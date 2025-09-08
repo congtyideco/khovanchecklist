@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Vận Hành & SOP (Tối ưu theo GDP/SOP)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        /* Thêm tiền tố 'acc-checklist-' vào các lớp CSS tùy chỉnh */
+        body { background-color: #f0f2f5; font-size: 14px; }
+        .acc-checklist-dashboard { position: sticky; top: 20px; }
+        .acc-checklist-status-select { font-weight: bold; }
+        .acc-checklist-status-not-started { color: #dc3545; border-color: #dc3545; }
+        .acc-checklist-status-in-progress { color: #ffc107; border-color: #ffc107; }
+        .acc-checklist-status-completed { color: #198754; border-color: #198754; }
+        #acc-checklist-reportModal .modal-body { white-space: pre-wrap; font-family: monospace; background-color: #f8f9fa; }
+
+        .acc-checklist-floating-btn {
+            background-color: #004a99;
+            color: white;
+            border: 2px solid white;
+            border-radius: 25px;
+            padding: 10px 15px;
+            font-weight: bold;
+            box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+        }
+
+        .acc-checklist-floating-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 5px 5px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .acc-checklist-floating-btn i {
+            margin-right: 8px;
+            font-size: 1.3rem;
+        }
+        
+        #acc-checklist-floatingBtn {
+            background-color: #dc3545;
+        }
+
+        #acc-checklist-mainAppModal .modal-dialog { max-width: 95vw; width: 1600px; }
+        #acc-checklist-mainAppModal .modal-content { height: 90vh; }
+        #acc-checklist-mainAppModal .modal-body { overflow-y: auto; background-color: #f8f9fa; }
+        
+        .acc-checklist-header-section {
+            background-color: #004a99; color: white; padding: 1rem;
+            border-radius: 0.5rem; margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .acc-checklist-task-card {
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 0.5rem;
+        }
+        .acc-checklist-task-card .card-header { font-weight: bold; font-size: 1.2rem; }
+        .acc-checklist-notes-input { width: 100%; border: 1px solid #eee; padding: 5px; border-radius: 4px; }
+
+        .acc-checklist-delete-btn { opacity: 0.5; transition: opacity 0.2s; }
+        .list-group-item:hover .acc-checklist-delete-btn { opacity: 1; }
+        .btn-loading .spinner-border { width: 1rem; height: 1rem; }
+
+        .container {
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+
+        .text-primary {
+            color: #004a99 !important;
+        }
+
+        .rounded {
+            border-radius: 0.5rem !important;
+        }
+
+        .shadow {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container text-center py-5">
+        <h1 class="mb-4 text-primary">VẬN HÀNH HIỆU QUẢ - GIAO NHẬN CHUYÊN NGHIỆP - TẠO RA GIÁ TRỊ!</h1>
+        <div class="d-flex justify-content-center">
+            <img src="https://cdn.imgpile.com/f/im0vJIV_xl.png" alt="Giao diện đẹp" class="img-fluid rounded shadow" style="max-width: 80%; height: auto;">
+        </div>
+    </div>
+
+    <div style="position: fixed; top: 60px; left: 20px; z-index: 1040; display: flex; flex-direction: column; gap: 10px;">
+        <a href="https://erp-ideco.skyit.vn/#/app/dashboard/main" style="text-decoration: none;">
+            <button id="acc-checklist-erpBtn" class="acc-checklist-floating-btn">
+                <i class="bi bi-house-door-fill"></i> ERP HOME
+            </button>
+        </a>
+        <button id="acc-checklist-floatingBtn" class="acc-checklist-floating-btn" data-bs-toggle="modal" data-bs-target="#acc-checklist-selectionModal">
+            <i class="bi bi-card-checklist"></i> Checklist Công việc
+        </button>
+    </div>
+    
+    <div class="modal fade" id="acc-checklist-selectionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-person-check-fill"></i> Bảng Chọn Checklist</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Chọn loại checklist bạn muốn quản lý:</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="showCoordinatorSelection()">
+                            <i class="bi bi-box-seam"></i> Kho & Giao nhận
+                        </button>
+                        <button class="btn btn-outline-success" onclick="showSOPSelection()">
+                            <i class="bi bi-clipboard-check"></i> Phụ trách SOP
+                        </button>
+                    </div>
+                    <hr>
+                    <div id="acc-checklist-accountantList" class="list-group" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="acc-checklist-mainAppModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                 <div class="modal-header bg-light">
+                    <h5 class="modal-title text-primary" id="acc-checklist-mainAppModalLabel"></h5>
+                    <button type="button" class="btn btn-outline-secondary btn-sm me-auto ms-4" onclick="backToSelection()">
+                        <i class="bi bi-arrow-left-right"></i> Quay lại Bảng Chọn
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="header-section acc-checklist-header-section text-center">
+                            <h2 id="acc-checklist-mainTitle"></h2>
+                            <h5 id="acc-checklist-currentMonth"></h5>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <div class="card acc-checklist-dashboard">
+                                    <div class="card-header bg-dark text-white"><i class="bi bi-speedometer2"></i> Bảng Điều Khiển</div>
+                                    <div class="card-body">
+                                        <h5>Tổng Quan Tiến Độ</h5>
+                                        <div class="progress" style="height: 30px;"><div id="acc-checklist-totalProgressBar" class="progress-bar bg-success progress-bar-striped progress-bar-animated" style="width: 0%; font-size: 1rem;">0%</div></div>
+                                        <hr>
+                                        <div id="acc-checklist-summary">
+                                            <p class="mb-1"><strong>Tổng số công việc:</strong> <span id="acc-checklist-totalTasks">0</span></p>
+                                            <p class="mb-1 text-success"><strong><i class="bi bi-check-circle-fill"></i> Hoàn thành:</strong> <span id="acc-checklist-completedTasks">0</span></p>
+                                            <p class="mb-1 text-warning"><strong><i class="bi bi-play-circle-fill"></i> Đang làm:</strong> <span id="acc-checklist-inProgressTasks">0</span></p>
+                                            <p class="mb-1 text-danger"><strong><i class="bi bi-x-circle-fill"></i> Chưa làm:</strong> <span id="acc-checklist-notStartedTasks">0</span></p>
+                                        </div>
+                                        <hr>
+                                        <div class="d-grid">
+                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#acc-checklist-reportModal"><i class="bi bi-file-earmark-text"></i> Tạo Báo Cáo Nhanh</button>
+                                        </div>
+                                        <div class="d-grid mt-3">
+                                            <button class="btn btn-warning" onclick="confirmRefreshChecklist()"><i class="bi bi-arrow-clockwise"></i> Làm mới kỳ mới</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-9">
+                                <div id="acc-checklist-taskList"></div>
+                                <div class="d-flex justify-content-end mt-3">
+                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#acc-checklist-addTaskModal"><i class="bi bi-plus-circle"></i> Thêm Công Việc Mới</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="acc-checklist-newAccountantModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="acc-checklist-newModalTitle">Tạo Checklist Mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <label for="acc-checklist-newAccountantNameInput" class="form-label" id="acc-checklist-newModalLabel">Nhập tên người phụ trách:</label>
+                    <input type="text" id="acc-checklist-newAccountantNameInput" class="form-control" placeholder="Ví dụ: Nguyễn Văn A">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" id="acc-checklist-saveNewAccountantBtn" class="btn btn-primary" onclick="createNewChecklist()">Lưu và Bắt đầu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="acc-checklist-addTaskModal" tabindex="-1" aria-labelledby="acc-checklist-addTaskModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title" id="acc-checklist-addTaskModalLabel">Thêm Công Việc Mới</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <form id="acc-checklist-addTaskForm">
+                        <div class="mb-3"><label for="acc-checklist-taskName" class="form-label">Tên công việc</label><input type="text" class="form-control" id="acc-checklist-taskName" required></div>
+                        <div class="mb-3">
+                            <label for="acc-checklist-taskCategory" class="form-label">Phân loại</label>
+                            <select class="form-select" id="acc-checklist-taskCategory" required>
+                                </select>
+                        </div>
+                        <div class="mb-3"><label for="acc-checklist-taskDeadline" class="form-label">Hạn chót (Tùy chọn)</label><input type="date" class="form-control" id="acc-checklist-taskDeadline"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="addTask()">Thêm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="acc-checklist-reportModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Báo Cáo Nhanh Tiến Độ</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="acc-checklist-reportContent"></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-primary" onclick="copyReport()"><i class="bi bi-clipboard"></i> Sao chép</button></div></div></div></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    const firebaseConfig = { 
+        apiKey : "AIzaSyB4cHf-DQ3iczPH25ocMY1_dL5gbSGzLKg" , 
+        authDomain : "baocaonhanh-8cfc6.firebaseapp.com" , 
+        databaseURL : "https://baocaonhanh-8cfc6-default-rtdb.firebaseio.com" , 
+        projectId : "baocaonhanh-8cfc6" , 
+        storageBucket : "baocaonhanh-8cfc6.firebasestorage.app" , 
+        messagingSenderId : "912512588357" , 
+        appId : "1:912512588357:web:d1956a0aaefb7be6c4212c" , 
+        measurementId : "G-SJM5VBK3Z2" 
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    let currentCoordinatorId = null;
+    let currentChecklistData = null;
+    let checklistType = null; // 'coordinator' or 'sop'
+    let selectionModal, mainAppModal, newAccountantModal, addTaskModal;
+
+    const initialTasksCoordinator = [
+        { id: 1, category: 'Đầu kỳ - Chuẩn bị', name: 'Kiểm kê tồn kho đầu kỳ và đối chiếu số liệu', status: 'not-started', notes: '', deadline: '' },
+        { id: 2, category: 'Đầu kỳ - Chuẩn bị', name: 'Rà soát danh sách khách hàng, tuyến giao hàng, khu vực', status: 'not-started', notes: '', deadline: '' },
+        { id: 3, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Tiếp nhận đơn hàng, lên kế hoạch điều phối giao nhận', status: 'not-started', notes: 'Ưu tiên đơn hàng có yêu cầu gấp hoặc giao xa', deadline: '' },
+        { id: 4, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Kiểm tra hàng hóa, đóng gói theo tiêu chuẩn GDP', status: 'not-started', notes: 'Sử dụng túi giữ nhiệt cho hàng lạnh', deadline: '' },
+        { id: 5, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Ghi chép và xử lý các vấn đề phát sinh trong quá trình đóng gói', status: 'not-started', notes: '', deadline: '' },
+        { id: 6, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Vận chuyển và giao hàng nội thành trực tiếp', status: 'not-started', notes: 'Ghi rõ giờ giao, ký nhận', deadline: '' },
+        { id: 7, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Thu tiền mặt (COD) và nộp tiền về kế toán', status: 'not-started', notes: 'Đối chiếu và ký xác nhận', deadline: '' },
+        { id: 8, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Phối hợp với đơn vị vận chuyển (GHN, GHTK...) để giao hàng ngoại thành', status: 'not-started', notes: 'Theo dõi mã vận đơn, tình trạng đơn hàng', deadline: '' },
+        { id: 9, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Giải quyết các vấn đề phát sinh từ khách hàng (hủy đơn, đổi trả...)', status: 'not-started', notes: '', deadline: '' },
+        { id: 10, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Tổng hợp số liệu xuất, nhập, tồn kho cuối kỳ', status: 'not-started', notes: '', deadline: '' },
+        { id: 11, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Kiểm tra và sắp xếp chứng từ, hóa đơn giao nhận', status: 'not-started', notes: 'Lưu trữ theo tháng', deadline: '' },
+        { id: 12, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Lập báo cáo tổng kết tình hình kho và giao nhận tháng', status: 'not-started', notes: 'Báo cáo cho ban giám đốc', deadline: '' },
+        { id: 13, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Kiểm tra và báo cáo điều kiện bảo quản kho (nhiệt độ, độ ẩm)', status: 'not-started', notes: '', deadline: '' },
+        { id: 14, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Đánh giá hiệu suất giao hàng và đề xuất cải thiện', status: 'not-started', notes: '', deadline: '' }
+    ];
+
+    const initialTasksSOP = [
+        { id: 1, category: 'Hàng ngày', name: 'Kiểm tra các thủ tục quy trình phát sinh trong xuất -nhập thuốc -báo cáo', status: 'not-started', notes: '', deadline: '' },
+        { id: 2, category: 'Hàng ngày', name: 'Giám sát quá trình đóng gói và vận chuyển', status: 'not-started', notes: 'Đảm bảo thuốc được giao đúng cách', deadline: '' },
+        { id: 3, category: 'Hàng tuần', name: 'Kiểm tra / khai báo việc giám sát nhiệt độ -độ ẩm kho- lưu dữ liệu trong máy', status: 'not-started', notes: 'Đảm bảo các điều kiện luôn nằm trong giới hạn cho phép', deadline: '' },
+        { id: 4, category: 'Hàng tuần', name: 'Xử lý các sai lệch điều kiện bảo quản nếu có', status: 'not-started', notes: '', deadline: '' },
+        { id: 5, category: 'Hàng tuần', name: 'Kiểm tra - đánh giá danh mục thuốc kinh doanh định kỳ - báo cáo BGD', status: 'not-started', notes: '', deadline: '' },
+        { id: 6, category: 'Hàng tuần', name: 'Giải quyết các sự cố, khiếu nại liên quan đến chất lượng thuốc', status: 'not-started', notes: '', deadline: '' },
+        { id: 7, category: 'Hàng tuần', name: 'Tổng hợp - xử lý các thủ tục khai form quản lý quy trình thuốc định kỳ', status: 'not-started', notes: '', deadline: '' },
+        { id: 8, category: 'Hàng tuần', name: 'Báo cáo công tác theo dõi SOP định kỳ tuần/ tháng', status: 'not-started', notes: '', deadline: '' }
+    ];
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        selectionModal = new bootstrap.Modal(document.getElementById('acc-checklist-selectionModal'));
+        mainAppModal = new bootstrap.Modal(document.getElementById('acc-checklist-mainAppModal'));
+        newAccountantModal = new bootstrap.Modal(document.getElementById('acc-checklist-newAccountantModal'));
+        addTaskModal = new bootstrap.Modal(document.getElementById('acc-checklist-addTaskModal'));
+        document.getElementById('acc-checklist-selectionModal').addEventListener('shown.bs.modal', resetSelectionView);
+    });
+
+    function setButtonLoading(button, isLoading) {
+        if (isLoading) {
+            button.disabled = true;
+            button.dataset.originalText = button.innerHTML;
+            button.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Đang xử lý...`;
+        } else {
+            button.disabled = false;
+            button.innerHTML = button.dataset.originalText;
+        }
+    }
+
+    function resetSelectionView() {
+        const listDiv = document.getElementById('acc-checklist-accountantList');
+        listDiv.innerHTML = '<p class="text-center text-muted p-3">Chọn loại checklist bạn muốn quản lý ở trên.</p>';
+    }
+
+    async function loadCoordinatorList() {
+        const listDiv = document.getElementById('acc-checklist-accountantList');
+        listDiv.innerHTML = `<div class="text-center p-3"><div class="spinner-border text-primary"></div></div>`;
+        try {
+            const snapshot = await database.ref('checklists/coordinator').once('value');
+            const data = snapshot.val();
+            listDiv.innerHTML = '<button class="btn btn-success mb-3" onclick="openNewAccountantModal(\'coordinator\')"><i class="bi bi-plus-circle"></i> Tạo Checklist Mới</button>';
+            if (data) {
+                Object.values(data).forEach(acc => {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    item.innerHTML = `
+                        <a href="#" class="text-decoration-none text-dark flex-grow-1" onclick="event.preventDefault(); loadChecklistFor('${acc.id}', 'coordinator')">
+                            <strong>${acc.coordinatorName}</strong>
+                            <br><small class="text-muted">Ngày lập: ${acc.creationDate}</small>
+                        </a>
+                        <button class="btn btn-outline-danger btn-sm acc-checklist-delete-btn" onclick="confirmDeleteCoordinator(this, '${acc.id}', '${acc.coordinatorName}', 'coordinator')"><i class="bi bi-trash-fill"></i></button>`;
+                    listDiv.appendChild(item);
+                });
+            } else {
+                listDiv.innerHTML += '<p class="text-center text-muted p-3">Chưa có checklist nào.</p>';
+            }
+        } catch (error) {
+            console.error("Lỗi:", error);
+            listDiv.innerHTML = '<p class="text-center text-danger p-3">Lỗi kết nối CSDL.</p>';
+        }
+    }
+
+    async function loadSOPList() {
+        const listDiv = document.getElementById('acc-checklist-accountantList');
+        listDiv.innerHTML = `<div class="text-center p-3"><div class="spinner-border text-primary"></div></div>`;
+        try {
+            const snapshot = await database.ref('checklists/sop').once('value');
+            const data = snapshot.val();
+            listDiv.innerHTML = '<button class="btn btn-success mb-3" onclick="openNewAccountantModal(\'sop\')"><i class="bi bi-plus-circle"></i> Tạo Checklist Mới</button>';
+            if (data) {
+                Object.values(data).forEach(acc => {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    item.innerHTML = `
+                        <a href="#" class="text-decoration-none text-dark flex-grow-1" onclick="event.preventDefault(); loadChecklistFor('${acc.id}', 'sop')">
+                            <strong>${acc.coordinatorName}</strong>
+                            <br><small class="text-muted">Ngày lập: ${acc.creationDate}</small>
+                        </a>
+                        <button class="btn btn-outline-danger btn-sm acc-checklist-delete-btn" onclick="confirmDeleteCoordinator(this, '${acc.id}', '${acc.coordinatorName}', 'sop')"><i class="bi bi-trash-fill"></i></button>`;
+                    listDiv.appendChild(item);
+                });
+            } else {
+                listDiv.innerHTML += '<p class="text-center text-muted p-3">Chưa có checklist nào.</p>';
+            }
+        } catch (error) {
+            console.error("Lỗi:", error);
+            listDiv.innerHTML = '<p class="text-center text-danger p-3">Lỗi kết nối CSDL.</p>';
+        }
+    }
+
+    function showCoordinatorSelection() {
+        checklistType = 'coordinator';
+        loadCoordinatorList();
+    }
+
+    function showSOPSelection() {
+        checklistType = 'sop';
+        loadSOPList();
+    }
+
+    function openNewAccountantModal(type) {
+        checklistType = type;
+        const modalTitle = document.getElementById('acc-checklist-newModalTitle');
+        const modalLabel = document.getElementById('acc-checklist-newModalLabel');
+        if (type === 'coordinator') {
+            modalTitle.innerText = 'Tạo Checklist Kho & Giao nhận';
+            modalLabel.innerText = 'Nhập tên người phụ trách kho:';
+        } else {
+            modalTitle.innerText = 'Tạo Checklist Phụ trách SOP';
+            modalLabel.innerText = 'Nhập tên người phụ trách SOP:';
+        }
+        document.getElementById('acc-checklist-newAccountantNameInput').value = '';
+        newAccountantModal.show();
+    }
+
+    async function createNewChecklist() {
+        const nameInput = document.getElementById('acc-checklist-newAccountantNameInput');
+        const name = nameInput.value.trim();
+        const saveBtn = document.getElementById('acc-checklist-saveNewAccountantBtn');
+        if (!name) { alert('Vui lòng nhập tên.'); return; }
+        setButtonLoading(saveBtn, true);
+        try {
+            const coordinatorId = slugify(name);
+            const ref = database.ref(`checklists/${checklistType}/${coordinatorId}`);
+            const snapshot = await ref.once('value');
+            if (snapshot.exists()) {
+                alert('Tên này đã tồn tại.');
+                return;
+            }
+            const initialTasks = (checklistType === 'coordinator') ? initialTasksCoordinator : initialTasksSOP;
+            const newChecklist = {
+                id: coordinatorId, coordinatorName: name,
+                creationDate: new Date().toLocaleDateString('vi-VN'),
+                tasks: JSON.parse(JSON.stringify(initialTasks))
+            };
+            await ref.set(newChecklist);
+            newAccountantModal.hide();
+            loadChecklistFor(coordinatorId, checklistType);
+        } catch (error) {
+            console.error("Lỗi:", error);
+            alert("Đã xảy ra lỗi khi tạo mới.");
+        } finally {
+            setButtonLoading(saveBtn, false);
+        }
+    }
+    
+    async function loadChecklistFor(coordinatorId, type) {
+        checklistType = type;
+        try {
+            const snapshot = await database.ref(`checklists/${checklistType}/${coordinatorId}`).once('value');
+            currentChecklistData = snapshot.val();
+            if (currentChecklistData) {
+                currentCoordinatorId = coordinatorId;
+                document.getElementById('acc-checklist-mainAppModalLabel').innerHTML = `<i class="bi bi-person-fill"></i> Checklist của: <strong>${currentChecklistData.coordinatorName}</strong>`;
+                document.getElementById('acc-checklist-mainTitle').innerText = (checklistType === 'coordinator') ? 'BẢNG CHECKLIST CÔNG VIỆC KHO & GIAO NHẬN HÀNG THÁNG' : 'BẢNG CHECKLIST KIỂM SOÁT SOP HÀNG TUẦN';
+                renderTasks(currentChecklistData.tasks);
+                selectionModal.hide();
+                mainAppModal.show();
+            } else {
+                alert('Không tìm thấy dữ liệu.');
+                if (checklistType === 'coordinator') loadCoordinatorList(); else loadSOPList();
+            }
+        } catch (error) {
+            console.error("Lỗi:", error);
+            alert("Không thể tải dữ liệu.");
+        }
+    }
+
+    function confirmDeleteCoordinator(button, id, name, type) {
+        if (confirm(`Bạn có chắc chắn muốn xóa checklist của "${name}" không?`)) {
+            deleteCoordinator(button, id, type);
+        }
+    }
+
+    async function deleteCoordinator(button, id, type) {
+        setButtonLoading(button, true);
+        try {
+            await database.ref(`checklists/${type}/${id}`).remove();
+            if (type === 'coordinator') loadCoordinatorList(); else loadSOPList();
+        } catch(error) {
+            console.error("Lỗi:", error);
+            alert("Xóa thất bại.");
+            setButtonLoading(button, false);
+        }
+    }
+
+    function backToSelection() {
+        mainAppModal.hide();
+        selectionModal.show();
+    }
+    
+    window.addTask = function() {
+        const name = document.getElementById('acc-checklist-taskName').value;
+        const category = document.getElementById('acc-checklist-taskCategory').value;
+        const deadline = document.getElementById('acc-checklist-taskDeadline').value;
+
+        if (name && category) {
+            const newId = currentChecklistData.tasks.length > 0 ? Math.max(...currentChecklistData.tasks.map(t => t.id)) + 1 : 1;
+            const newTask = {
+                id: newId, category: category, name: name,
+                status: 'not-started', notes: '', deadline: deadline
+            };
+            currentChecklistData.tasks.push(newTask);
+            saveTasks();
+            renderTasks(currentChecklistData.tasks);
+            
+            addTaskModal.hide();
+            document.getElementById('acc-checklist-addTaskForm').reset();
+        } else {
+            alert('Vui lòng nhập tên công việc và chọn phân loại.');
+        }
+    }
+
+    async function saveTasks() {
+        if (!currentCoordinatorId) return;
+        try {
+            await database.ref(`checklists/${checklistType}/${currentCoordinatorId}/tasks`).set(currentChecklistData.tasks);
+        } catch (error) {
+            console.error("Lỗi khi lưu:", error);
+            alert("Lỗi: Không thể lưu thay đổi.");
+        }
+    }
+
+    function renderTasks(tasks) {
+        const now = new Date();
+        document.getElementById('acc-checklist-currentMonth').innerText = (checklistType === 'coordinator') ? `KỲ BÁO CÁO: THÁNG ${now.getMonth() + 1} NĂM ${now.getFullYear()}` : `KỲ BÁO CÁO: TUẦN ${getWeekNumber(now)} NĂM ${now.getFullYear()}`;
+        
+        const taskListDiv = document.getElementById('acc-checklist-taskList');
+        taskListDiv.innerHTML = '';
+        const categories = [...new Set(tasks.map(task => task.category))];
+        
+        // Dynamically populate task categories for the "Add Task" modal
+        const taskCategorySelect = document.getElementById('acc-checklist-taskCategory');
+        taskCategorySelect.innerHTML = '';
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.innerText = category;
+            taskCategorySelect.appendChild(option);
+        });
+
+        categories.forEach(category => {
+            const card = document.createElement('div');
+            card.className = 'card acc-checklist-task-card';
+            let iconClass = 'bi-journal-bookmark';
+            if (category.includes('Trong kỳ') || category.includes('Đầu kỳ')) iconClass = 'bi-box-seam';
+            if (category.includes('Cuối kỳ')) iconClass = 'bi-file-earmark-bar-graph';
+            if (category.includes('Hàng ngày') || category.includes('Hàng tuần')) iconClass = 'bi-clipboard-check';
+            card.innerHTML = `<div class="card-header"><i class="bi ${iconClass}"></i> ${category}</div>`;
+            
+            const table = document.createElement('table');
+            table.className = 'table table-hover table-striped mb-0';
+            table.innerHTML = `<thead class="table-light"><tr><th style="width: 5%;">#</th><th style="width: 40%;">Nội dung công việc</th><th style="width: 15%;">Trạng thái</th><th style="width: 15%;">Hạn chót</th><th style="width: 25%;">Ghi chú</th></tr></thead>`;
+            const tbody = document.createElement('tbody');
+            tasks.filter(t => t.category === category).forEach(task => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${task.id}</td><td>${task.name}</td>
+                    <td><select class="form-select form-select-sm acc-checklist-status-select" onchange="updateStatus(${task.id}, this.value)"><option value="not-started">Chưa làm</option><option value="in-progress">Đang làm</option><option value="completed">Hoàn thành</option></select></td>
+                    <td><input type="date" class="form-control form-control-sm" value="${task.deadline || ''}" onchange="updateDeadline(${task.id}, this.value)"></td>
+                    <td><textarea class="form-control form-control-sm acc-checklist-notes-input" rows="1" onchange="updateNotes(${task.id}, this.value)">${task.notes || ''}</textarea></td>`;
+                const select = tr.querySelector('.acc-checklist-status-select');
+                select.value = task.status;
+                updateSelectColor(select, task.status);
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            card.appendChild(table);
+            taskListDiv.appendChild(card);
+        });
+        updateDashboard();
+    }
+
+    function updateStatus(taskId, status) { const task = currentChecklistData.tasks.find(t => t.id === taskId); if (task) { task.status = status; updateSelectColor(event.target, status); updateDashboard(); saveTasks(); } }
+    function updateNotes(taskId, notes) { const task = currentChecklistData.tasks.find(t => t.id === taskId); if(task){task.notes = notes; saveTasks();} }
+    function updateDeadline(taskId, deadline) { const task = currentChecklistData.tasks.find(t => t.id === taskId); if(task){task.deadline = deadline; saveTasks();} }
+
+    function updateDashboard() {
+        if (!currentChecklistData) return;
+        const tasks = currentChecklistData.tasks;
+        const total = tasks.length, completed = tasks.filter(t => t.status === 'completed').length;
+        const inProgress = tasks.filter(t => t.status === 'in-progress').length;
+        document.getElementById('acc-checklist-totalTasks').innerText = total;
+        document.getElementById('acc-checklist-completedTasks').innerText = completed;
+        document.getElementById('acc-checklist-inProgressTasks').innerText = inProgress;
+        document.getElementById('acc-checklist-notStartedTasks').innerText = total - completed - inProgress;
+        const progressBar = document.getElementById('acc-checklist-totalProgressBar');
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+        progressBar.style.width = `${percentage}%`;
+        progressBar.innerText = `${percentage}%`;
+    }
+    
+    function updateSelectColor(select, status) {
+        select.className = 'form-select form-select-sm acc-checklist-status-select';
+        if (status === 'not-started') select.classList.add('acc-checklist-status-not-started');
+        else if (status === 'in-progress') select.classList.add('acc-checklist-status-in-progress');
+        else if (status === 'completed') select.classList.add('acc-checklist-status-completed');
+    }
+
+    function slugify(str) {
+        str = str.replace(/^\s+|\s+$/g, '').toLowerCase();
+        const from = "àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ·/_,:;";
+        const to   = "aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd------";
+        for (let i = 0, l = from.length; i < l; i++) str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+        return str.replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+    }
+
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return weekNo;
+    }
+
+    window.copyReport = function() { navigator.clipboard.writeText(document.getElementById('acc-checklist-reportContent').innerText).then(() => alert('Đã sao chép báo cáo!')); };
+    
+    document.getElementById('acc-checklist-reportModal').addEventListener('show.bs.modal', function () {
+        if (!currentChecklistData) return;
+        const { coordinatorName, creationDate, tasks } = currentChecklistData;
+        const total = tasks.length;
+        const completed = tasks.filter(t => t.status === 'completed').length;
+        const inProgress = tasks.filter(t => t.status === 'in-progress').length;
+        const notStarted = total - completed - inProgress;
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+        
+        const reportTitle = (checklistType === 'coordinator') ? 'BÁO CÁO TIẾN ĐỘ VẬN HÀNH KHO & GIAO NHẬN' : 'BÁO CÁO TIẾN ĐỘ KIỂM SOÁT SOP';
+
+        let reportText = `${reportTitle}\n`;
+        reportText += `=====================================\n`;
+        reportText += `● Người phụ trách: ${coordinatorName}\n`;
+        reportText += `● Ngày báo cáo: ${new Date().toLocaleDateString('vi-VN')}\n`;
+        reportText += `\n--- TỔNG QUAN ---\n`;
+        reportText += `● Hoàn thành: ${completed}/${total} công việc (${percentage}%)\n`;
+        reportText += `● Đang làm: ${inProgress} công việc\n`;
+        reportText += `● Chưa làm: ${notStarted} công việc\n`;
+        
+        reportText += `\n--- CHI TIẾT TẤT CẢ CÔNG VIỆC ---\n`;
+        tasks.forEach(task => { 
+            let statusLabel;
+            if (task.status === 'completed') {
+                statusLabel = 'Hoàn thành';
+            } else if (task.status === 'in-progress') {
+                statusLabel = 'Đang làm';
+            } else {
+                statusLabel = 'Chưa làm';
+            }
+
+            reportText += `[${statusLabel}] - ${task.name}\n`; 
+            if (task.notes) {
+                reportText += `  └ Ghi chú: ${task.notes}\n`;
+            }
+        });
+        
+        document.getElementById('acc-checklist-reportContent').innerText = reportText;
+    });
+
+    function confirmRefreshChecklist() {
+        if (confirm("Bạn có chắc chắn muốn làm mới checklist cho kỳ mới không? Thao tác này sẽ đặt lại tất cả trạng thái công việc về 'Chưa làm' và xóa ghi chú/hạn chót.")) {
+            refreshChecklist();
+        }
+    }
+
+    async function refreshChecklist() {
+        if (!currentCoordinatorId) {
+            alert("Vui lòng chọn một checklist để làm mới.");
+            return;
+        }
+
+        try {
+            const loadingBtn = document.querySelector('.btn-warning');
+            setButtonLoading(loadingBtn, true);
+
+            const snapshot = await database.ref(`checklists/${checklistType}/${currentCoordinatorId}`).once('value');
+            const currentData = snapshot.val();
+            
+            if (currentData) {
+                const newTasks = currentData.tasks.map(task => {
+                    return { ...task, status: 'not-started', notes: '', deadline: '' };
+                });
+
+                await database.ref(`checklists/${checklistType}/${currentCoordinatorId}/tasks`).set(newTasks);
+                
+                currentChecklistData.tasks = newTasks;
+                renderTasks(currentChecklistData.tasks);
+                alert("Đã làm mới checklist thành công cho kỳ mới!");
+            } else {
+                alert("Không tìm thấy dữ liệu để làm mới.");
+            }
+
+        } catch (error) {
+            console.error("Lỗi khi làm mới:", error);
+            alert("Đã xảy ra lỗi khi làm mới checklist.");
+        } finally {
+            const loadingBtn = document.querySelector('.btn-warning');
+            setButtonLoading(loadingBtn, false);
+        }
+    }
+    </script>
+</body>
+</html>
