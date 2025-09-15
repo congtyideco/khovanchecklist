@@ -249,19 +249,19 @@
 
     const initialTasksCoordinator = [
         { id: 1, category: 'Đầu kỳ - Chuẩn bị', name: 'Kiểm kê tồn kho đầu kỳ và đối chiếu số liệu', status: 'not-started', notes: '', deadline: '' },
-        { id: 2, category: 'Đầu kỳ - Chuẩn bị', name: 'Rát soát trong ngày: đơn chưa xử lý/ chưa đóng hàng/ chưa giao - xử lý', status: 'not-started', notes: '', deadline: '' },
-        { id: 3, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Tiếp nhận đơn hàng, lên kế hoạch điều phối giao nhận', status: 'not-started', notes: 'Ưu tiên đơn hàng có yêu cầu gấp hoặc giao xa', deadline: '' },
-        { id: 4, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Kiểm tra hàng hóa, đóng háng/ giao hàng trong tuần', status: 'not-started', notes: 'Sử dụng túi giữ nhiệt cho hàng lạnh', deadline: '' },
-        { id: 5, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Ghi chép và xử lý các vấn đề phát sinh trong quá trình đóng gói', status: 'not-started', notes: '', deadline: '' },
-        { id: 6, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Vận chuyển và giao hàng nội thành trực tiếp', status: 'not-started', notes: 'Ghi rõ giờ giao, ký nhận', deadline: '' },
-        { id: 7, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Thu tiền mặt (COD) và nộp tiền về kế toán', status: 'not-started', notes: 'Đối chiếu và ký xác nhận', deadline: '' },
-        { id: 8, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Phối hợp với đơn vị vận chuyển (GHN, GHTK...) để giao hàng ngoại thành', status: 'not-started', notes: 'Theo dõi mã vận đơn, tình trạng đơn hàng', deadline: '' },
-        { id: 9, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Thủ tục kiểm tra khai phiếu - nhập phiếu cho hàng trả - đổi (hủy đơn, đổi trả...)', status: 'not-started', notes: '', deadline: '' },
-        { id: 10, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Tổng hợp số liệu xuất, nhập, tồn kho cuối kỳ', status: 'not-started', notes: '', deadline: '' },
-        { id: 11, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Kiểm tra và sắp xếp chứng từ, hóa đơn giao nhận', status: 'not-started', notes: 'Lưu trữ theo tháng', deadline: '' },
-        { id: 12, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Lập báo cáo tổng kết tình hình kho và giao nhận tháng', status: 'not-started', notes: 'Báo cáo cho ban giám đốc', deadline: '' },
-        { id: 13, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Kiểm tra và báo cáo điều kiện bảo quản kho (nhiệt độ, độ ẩm)', status: 'not-started', notes: '', deadline: '' },
-        { id: 14, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Đánh giá hiệu suất giao hàng và đề xuất cải thiện', status: 'not-started', notes: '', deadline: '' }
+        { id: 2, category: 'Đầu kỳ - Chuẩn bị', name: 'Rà soát danh sách khách hàng, tuyến giao hàng, khu vực', status: 'not-started', notes: '', deadline: '' },
+        { id: 3, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Thực hiện điều phối nhận hàng trong ngày/tuần - yêu cầu gợi phiếu xuất hàng trước', status: 'not-started', notes: 'Ưu tiên đơn hàng có yêu cầu gấp hoặc giao xa', deadline: '' },
+        { id: 4, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Thực hiện phối hợp kiểm tra- khai thủ tục nhập kho hàng trong tuần / chứng từ nhập kho', status: 'not-started', notes: 'Sử dụng túi giữ nhiệt cho hàng lạnh', deadline: '' },
+        { id: 5, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Thực hiện việc kiểm hàng - nhập dữ liệu đóng gói - giao nhận phát sinh ngày', status: 'not-started', notes: '', deadline: '' },
+        { id: 6, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Thực hiện kiểm tra tình trạng đơn hàng chuẩn bị giao: phiếu xuất kho - in tem nhãn giao nhận', status: 'not-started', notes: 'Ghi rõ giờ giao, ký nhận', deadline: '' },
+        { id: 7, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Thực hiện công tác giao hàng trong ngày - nhập liệu giao hàng - kiểm tra giao hàng', status: 'not-started', notes: 'Đối chiếu và ký xác nhận', deadline: '' },
+        { id: 8, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Thực hiện công tác thu tiền- kiểm tra đối soát thu tiên- thông báo đến kế toán-BGĐ', status: 'not-started', notes: 'Theo dõi mã vận đơn, tình trạng đơn hàng', deadline: '' },
+        { id: 9, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Giải quyết các vấn đề phát sinh từ khách hàng (hủy đơn, đổi trả...)', status: 'not-started', notes: '', deadline: '' },
+         { id:10, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Thực hiện nhiệm vụ giao trong tuần theo định hướng/ phát sinh liên quan đến kho - giao nhận', status: 'not-started', notes: '', deadline: '' },
+		{ id: 11, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Thực hiện đối chiếu số liệu kho - kiểm kho -sắp xếp lại kho ', status: 'not-started', notes: '', deadline: '' },
+        { id: 12, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Kiểm tra và sắp xếp chứng từ, hóa đơn giao nhận', status: 'not-started', notes: 'Lưu trữ theo tháng', deadline: '' },
+        { id: 13, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Kiểm tra và báo cáo điều kiện bảo quản kho (nhiệt độ, độ ẩm)/ khai báo giao nhận vào form', status: 'not-started', notes: '', deadline: '' },
+        { id: 14, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Báo cáo KPI - cập nhật số liệu trong kỳ: in - lưu chứng từ kho định kỳ', status: 'not-started', notes: '', deadline: '' }
     ];
 
     const initialTasksSOP = [
@@ -666,4 +666,3 @@
     </script>
 </body>
 </html>
-
