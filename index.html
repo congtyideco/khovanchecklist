@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Vận Hành & SOP (Tối ưu theo GDP/SOP)</title>
+    <title>Quản lý Vận Hành & SOP (Phiên bản Fix Lỗi Phân Loại)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        /* Thêm tiền tố 'acc-checklist-' vào các lớp CSS tùy chỉnh */
+        /* CSS Giữ nguyên như cũ */
         body { background-color: #f0f2f5; font-size: 14px; }
         .acc-checklist-dashboard { position: sticky; top: 20px; }
         .acc-checklist-status-select { font-weight: bold; }
@@ -65,63 +65,18 @@
         .list-group-item:hover .acc-checklist-delete-btn { opacity: 1; }
         .btn-loading .spinner-border { width: 1rem; height: 1rem; }
 
-        .container {
-            padding-top: 5rem;
-            padding-bottom: 5rem;
-        }
-
-        .text-primary {
-            color: #004a99 !important;
-        }
-
-        .rounded {
-            border-radius: 0.5rem !important;
-        }
-
-        .shadow {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-        }
+        .container { padding-top: 5rem; padding-bottom: 5rem; }
+        .text-primary { color: #004a99 !important; }
+        .rounded { border-radius: 0.5rem !important; }
+        .shadow { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; }
         
-        /* Các lớp CSS mới cho tính năng chỉnh sửa */
-        .acc-checklist-editable {
-            cursor: pointer;
-            transition: background-color 0.2s;
-            padding: 2px 4px;
-            border-radius: 3px;
-        }
-        
-        .acc-checklist-editable:hover {
-            background-color: rgba(0, 74, 153, 0.1);
-        }
-        
-        .acc-checklist-edit-input {
-            width: 100%;
-            padding: 4px 6px;
-            border: 1px solid #004a99;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .acc-checklist-edit-buttons {
-            display: flex;
-            gap: 5px;
-            margin-top: 5px;
-        }
-        
-        .acc-checklist-edit-buttons button {
-            font-size: 12px;
-            padding: 2px 8px;
-        }
-        
-        .acc-checklist-task-name {
-            word-break: break-word;
-        }
-        
-        .acc-checklist-notes-validation {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 5px;
-        }
+        .acc-checklist-editable { cursor: pointer; transition: background-color 0.2s; padding: 2px 4px; border-radius: 3px; }
+        .acc-checklist-editable:hover { background-color: rgba(0, 74, 153, 0.1); }
+        .acc-checklist-edit-input { width: 100%; padding: 4px 6px; border: 1px solid #004a99; border-radius: 4px; font-size: 14px; }
+        .acc-checklist-edit-buttons { display: flex; gap: 5px; margin-top: 5px; }
+        .acc-checklist-edit-buttons button { font-size: 12px; padding: 2px 8px; }
+        .acc-checklist-task-name { word-break: break-word; }
+        .acc-checklist-notes-validation { color: #dc3545; font-size: 12px; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -214,7 +169,7 @@
                             <div class="col-lg-9">
                                 <div id="acc-checklist-taskList"></div>
                                 <div class="d-flex justify-content-end mt-3">
-                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#acc-checklist-addTaskModal"><i class="bi bi-plus-circle"></i> Thêm Công Việc Mới</button>
+                                    <button class="btn btn-success" onclick="openAddTaskModal()"><i class="bi bi-plus-circle"></i> Thêm Công Việc Mới</button>
                                 </div>
                             </div>
                         </div>
@@ -250,6 +205,7 @@
                         <div class="mb-3">
                             <label for="acc-checklist-taskCategory" class="form-label">Phân loại</label>
                             <select class="form-select" id="acc-checklist-taskCategory" required>
+                                <option value="" disabled selected>Chọn phân loại...</option>
                                 </select>
                         </div>
                         <div class="mb-3"><label for="acc-checklist-taskDeadline" class="form-label">Hạn chót (Tùy chọn)</label><input type="date" class="form-control" id="acc-checklist-taskDeadline"></div>
@@ -265,7 +221,6 @@
 
     <div class="modal fade" id="acc-checklist-reportModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Báo Cáo Nhanh Tiến Độ</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="acc-checklist-reportContent"></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-primary" onclick="copyReport()"><i class="bi bi-clipboard"></i> Sao chép</button></div></div></div></div>
 
-    <!-- Modal xác nhận xóa checklist -->
     <div class="modal fade" id="acc-checklist-deleteConfirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -284,7 +239,6 @@
         </div>
     </div>
 
-    <!-- Modal yêu cầu ghi chú khi hoàn thành -->
     <div class="modal fade" id="acc-checklist-completionNotesModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -325,7 +279,7 @@
 
     let currentCoordinatorId = null;
     let currentChecklistData = null;
-    let checklistType = null; // 'coordinator' or 'sop'
+    let checklistType = null; 
     let selectionModal, mainAppModal, newAccountantModal, addTaskModal, deleteConfirmModal, completionNotesModal;
     let currentEditingTaskId = null;
     let currentTaskForCompletion = null;
@@ -371,7 +325,48 @@
         // Thiết lập sự kiện cho modal hoàn thành
         document.getElementById('acc-checklist-saveCompletionBtn').addEventListener('click', saveCompletionWithNotes);
         document.getElementById('acc-checklist-completionNotes').addEventListener('input', validateCompletionNotes);
+
+        // --- FIX QUAN TRỌNG: Lắng nghe sự kiện mở Modal để điền dữ liệu ---
+        document.getElementById('acc-checklist-addTaskModal').addEventListener('show.bs.modal', populateTaskCategories);
     });
+
+    // Hàm mới để nạp danh mục (Được gọi tự động khi Modal mở)
+    function populateTaskCategories() {
+        const categorySelect = document.getElementById('acc-checklist-taskCategory');
+        // Xóa cũ và thêm option mặc định
+        categorySelect.innerHTML = '<option value="" disabled selected>Chọn phân loại...</option>';
+        
+        // Xác định nguồn dữ liệu gốc
+        // Nếu checklistType chưa set (lỗi hiếm), mặc định về Coordinator
+        let sourceTasks = (checklistType === 'sop') ? initialTasksSOP : initialTasksCoordinator;
+        
+        // Sử dụng Set để lấy danh sách duy nhất
+        const categories = new Set(sourceTasks.map(task => task.category));
+        
+        // Nếu checklist hiện tại có category lạ (do người dùng tự sửa trong DB), thêm vào luôn
+        if(currentChecklistData && currentChecklistData.tasks) {
+            currentChecklistData.tasks.forEach(task => {
+                if(task.category) categories.add(task.category);
+            });
+        }
+
+        // Render ra thẻ Select
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.appendChild(option);
+        });
+        
+        // Reset form
+        document.getElementById('acc-checklist-taskName').value = '';
+        document.getElementById('acc-checklist-taskDeadline').value = '';
+    }
+
+    // Hàm mở modal (chỉ đơn giản là show modal, việc nạp dữ liệu do Event Listener lo)
+    function openAddTaskModal() {
+        addTaskModal.show();
+    }
 
     function setButtonLoading(button, isLoading) {
         if (isLoading) {
@@ -808,21 +803,6 @@
         }
     }
 
-    function openAddTaskModal() {
-        const categorySelect = document.getElementById('acc-checklist-taskCategory');
-        categorySelect.innerHTML = '';
-        const categories = [...new Set(currentChecklistData.tasks.map(task => task.category))];
-        categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
-            categorySelect.appendChild(option);
-        });
-        document.getElementById('acc-checklist-taskName').value = '';
-        document.getElementById('acc-checklist-taskDeadline').value = '';
-        addTaskModal.show();
-    }
-
     async function addTask() {
         const nameInput = document.getElementById('acc-checklist-taskName');
         const categorySelect = document.getElementById('acc-checklist-taskCategory');
@@ -833,7 +813,14 @@
         if (!name) { alert('Vui lòng nhập tên công việc.'); return; }
         if (!category) { alert('Vui lòng chọn phân loại.'); return; }
         try {
-            const newTaskId = currentChecklistData.tasks.length > 0 ? Math.max(...currentChecklistData.tasks.map(task => task.id)) + 1 : 1;
+            // Fix: Tạo mảng rỗng nếu chưa có task nào
+            if(!currentChecklistData.tasks) currentChecklistData.tasks = [];
+            
+            const maxId = currentChecklistData.tasks.length > 0 
+                ? Math.max(...currentChecklistData.tasks.map(task => task.id)) 
+                : 0;
+            const newTaskId = maxId + 1;
+
             const newTask = {
                 id: newTaskId,
                 category: category,
