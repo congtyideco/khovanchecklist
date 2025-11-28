@@ -3,18 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Vận Hành & SOP (Phiên bản Ổn định - Fix lỗi Dữ liệu)</title>
+    <title>Quản lý Vận Hành & SOP Pro - Xuất PDF</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        /* GIỮ NGUYÊN GIAO DIỆN CŨ */
         body { background-color: #f0f2f5; font-size: 14px; }
         .acc-checklist-dashboard { position: sticky; top: 20px; }
         .acc-checklist-status-select { font-weight: bold; }
-        .acc-checklist-status-not-started { color: #dc3545; border-color: #dc3545; }
-        .acc-checklist-status-in-progress { color: #ffc107; border-color: #ffc107; }
-        .acc-checklist-status-completed { color: #198754; border-color: #198754; }
-        #acc-checklist-reportModal .modal-body { white-space: pre-wrap; font-family: monospace; background-color: #f8f9fa; }
+        
+        /* Cải tiến hiển thị cho Report Modal để xuất PDF đẹp */
+        #acc-checklist-reportModal .modal-body { 
+            background-color: #fff; 
+            padding: 30px; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .report-header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #004a99; padding-bottom: 15px; }
+        .report-title { color: #004a99; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .report-sub-info { color: #6c757d; font-style: italic; }
+        .report-section-header { 
+            background-color: #f8f9fa; 
+            color: #004a99; 
+            padding: 8px 12px; 
+            font-weight: bold; 
+            margin-top: 20px; 
+            border-left: 4px solid #004a99;
+            text-transform: uppercase;
+        }
 
         .acc-checklist-floating-btn {
             background-color: #004a99; color: white; border: 2px solid white; border-radius: 25px;
@@ -36,17 +50,11 @@
 
         .acc-checklist-delete-btn { opacity: 0.5; transition: opacity 0.2s; }
         .list-group-item:hover .acc-checklist-delete-btn { opacity: 1; }
-        .btn-loading .spinner-border { width: 1rem; height: 1rem; }
         .container { padding-top: 5rem; padding-bottom: 5rem; }
         .text-primary { color: #004a99 !important; }
         .rounded { border-radius: 0.5rem !important; }
         .shadow { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; }
         
-        .acc-checklist-editable { cursor: pointer; transition: background-color 0.2s; padding: 2px 4px; border-radius: 3px; }
-        .acc-checklist-editable:hover { background-color: rgba(0, 74, 153, 0.1); }
-        .acc-checklist-edit-input { width: 100%; padding: 4px 6px; border: 1px solid #004a99; border-radius: 4px; font-size: 14px; }
-        .acc-checklist-edit-buttons { display: flex; gap: 5px; margin-top: 5px; }
-        .acc-checklist-edit-buttons button { font-size: 12px; padding: 2px 8px; }
         .acc-checklist-task-name { word-break: break-word; }
         .acc-checklist-notes-validation { color: #dc3545; font-size: 12px; margin-top: 5px; }
     </style>
@@ -131,7 +139,7 @@
                                         </div>
                                         <hr>
                                         <div class="d-grid">
-                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#acc-checklist-reportModal"><i class="bi bi-file-earmark-text"></i> Tạo Báo Cáo Nhanh</button>
+                                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#acc-checklist-reportModal"><i class="bi bi-file-earmark-pdf"></i> Xuất Báo Cáo PDF</button>
                                         </div>
                                         <div class="d-grid mt-3">
                                             <button class="btn btn-warning" onclick="confirmRefreshChecklist()"><i class="bi bi-arrow-clockwise"></i> Làm mới kỳ mới</button>
@@ -192,7 +200,24 @@
         </div>
     </div>
 
-    <div class="modal fade" id="acc-checklist-reportModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Báo Cáo Nhanh Tiến Độ</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="acc-checklist-reportContent"></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="button" class="btn btn-primary" onclick="copyReport()"><i class="bi bi-clipboard"></i> Sao chép</button></div></div></div></div>
+    <div class="modal fade" id="acc-checklist-reportModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xem trước Báo Cáo PDF</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="acc-checklist-reportContent">
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" onclick="exportToPDF()">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Tải về PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="acc-checklist-deleteConfirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -235,9 +260,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
-    // --- 1. CẤU HÌNH FIREBASE (GIỮ NGUYÊN) ---
+    // --- 1. CẤU HÌNH FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyBD8aIBY5OARTj4TfhhzoasImK0CkXqGGY",
         authDomain: "khovanchecklist.firebaseapp.com",
@@ -257,16 +283,12 @@
     let currentCoordinatorId = null;
     let currentChecklistData = null;
     let checklistType = null; // 'coordinator' hoặc 'sop'
-    
-    // Các biến Modal
     let selectionModal, mainAppModal, newAccountantModal, addTaskModal, deleteConfirmModal, completionNotesModal;
-    
-    // Biến tạm
     let currentTaskForCompletion = null;
-    let deleteTargetId = null; // Dùng cho chức năng xóa
+    let deleteTargetId = null; 
     let deleteTargetType = null;
 
-    // --- 3. DỮ LIỆU MẪU (Dùng để khởi tạo & Nạp danh mục) ---
+    // --- 3. DỮ LIỆU MẪU ---
     const initialTasksCoordinator = [
         { id: 1, category: 'Đầu kỳ - Chuẩn bị', name: 'Kiểm kê tồn kho đầu kỳ và đối chiếu số liệu', status: 'not-started', notes: '', deadline: '' },
         { id: 2, category: 'Đầu kỳ - Chuẩn bị', name: 'Rà soát danh sách khách hàng, tuyến giao hàng, khu vực', status: 'not-started', notes: '', deadline: '' },
@@ -297,7 +319,6 @@
     
     // --- 4. KHỞI TẠO ---
     document.addEventListener('DOMContentLoaded', () => {
-        // Init Modals
         selectionModal = new bootstrap.Modal(document.getElementById('acc-checklist-selectionModal'));
         mainAppModal = new bootstrap.Modal(document.getElementById('acc-checklist-mainAppModal'));
         newAccountantModal = new bootstrap.Modal(document.getElementById('acc-checklist-newAccountantModal'));
@@ -305,65 +326,38 @@
         deleteConfirmModal = new bootstrap.Modal(document.getElementById('acc-checklist-deleteConfirmModal'));
         completionNotesModal = new bootstrap.Modal(document.getElementById('acc-checklist-completionNotesModal'));
         
-        // Event Listeners
         document.getElementById('acc-checklist-saveCompletionBtn').addEventListener('click', saveCompletionWithNotes);
         document.getElementById('acc-checklist-completionNotes').addEventListener('input', validateCompletionNotes);
-        
-        // Auto-populate Category dropdown when Add Task modal opens
         document.getElementById('acc-checklist-addTaskModal').addEventListener('show.bs.modal', populateTaskCategories);
         
-        // Delete Confirmation Action
         document.getElementById('acc-checklist-confirmDeleteBtn').addEventListener('click', async () => {
             if (deleteTargetId && deleteTargetType) {
                 await executeDelete(deleteTargetId, deleteTargetType);
             }
         });
+
+        // BIND EVENT CHO MODAL BÁO CÁO (Đã nâng cấp)
+        document.getElementById('acc-checklist-reportModal').addEventListener('show.bs.modal', generatePDFReportContent);
     });
 
-    // --- 5. HÀM HỖ TRỢ & GIAO DIỆN ---
-    function openSelectionModal() {
-        selectionModal.show();
-    }
+    // --- 5. HÀM HỖ TRỢ ---
+    function openSelectionModal() { selectionModal.show(); }
+    function showCoordinatorSelection() { checklistType = 'coordinator'; document.getElementById('current-list-title').innerText = "Danh sách Kho & Giao nhận"; loadList('coordinator'); }
+    function showSOPSelection() { checklistType = 'sop'; document.getElementById('current-list-title').innerText = "Danh sách Phụ trách SOP"; loadList('sop'); }
+    function slugify(text) { return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, ''); }
 
-    function showCoordinatorSelection() {
-        checklistType = 'coordinator';
-        document.getElementById('current-list-title').innerText = "Danh sách Kho & Giao nhận";
-        loadList('coordinator');
-    }
-
-    function showSOPSelection() {
-        checklistType = 'sop';
-        document.getElementById('current-list-title').innerText = "Danh sách Phụ trách SOP";
-        loadList('sop');
-    }
-
-    function slugify(text) {
-        return text.toString().toLowerCase()
-            .replace(/\s+/g, '-')     
-            .replace(/[^\w\-]+/g, '') 
-            .replace(/\-\-+/g, '-')   
-            .replace(/^-+/, '')       
-            .replace(/-+$/, '');      
-    }
-
-    // --- 6. LOGIC TẢI DANH SÁCH (Fix lỗi không hiện dữ liệu) ---
+    // --- 6. TẢI DANH SÁCH ---
     async function loadList(type) {
         const listDiv = document.getElementById('acc-checklist-accountantList');
         listDiv.innerHTML = `<div class="text-center p-3"><div class="spinner-border text-primary"></div></div>`;
-        
         try {
             const snapshot = await database.ref(`checklists/${type}`).once('value');
             const data = snapshot.val();
-            
             listDiv.innerHTML = `<button class="btn btn-success mb-3 w-100" onclick="openNewAccountantModal('${type}')"><i class="bi bi-plus-circle"></i> Tạo Người Mới</button>`;
-            
             if (data) {
-                // Duyệt qua từng key trong object để đảm bảo lấy đúng ID
                 Object.entries(data).forEach(([key, value]) => {
                     const item = document.createElement('div');
                     item.className = 'list-group-item d-flex justify-content-between align-items-center mb-2 shadow-sm rounded';
-                    
-                    // QUAN TRỌNG: Truyền đúng 'key' (ID từ DB) và 'type' vào hàm loadChecklistFor
                     item.innerHTML = `
                         <div class="d-flex align-items-center flex-grow-1" style="cursor:pointer;" onclick="loadChecklistFor('${key}', '${type}')">
                             <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
@@ -375,100 +369,60 @@
                             </div>
                         </div>
                         <div>
-                            <button class="btn btn-outline-danger btn-sm rounded-circle" style="width: 32px; height: 32px;" 
-                                onclick="confirmDelete('${key}', '${value.coordinatorName}', '${type}')" title="Xóa">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            <button class="btn btn-outline-danger btn-sm rounded-circle" style="width: 32px; height: 32px;" onclick="confirmDelete('${key}', '${value.coordinatorName}', '${type}')" title="Xóa"><i class="bi bi-trash"></i></button>
                         </div>`;
                     listDiv.appendChild(item);
                 });
-            } else {
-                listDiv.innerHTML += '<div class="alert alert-info text-center">Chưa có danh sách nào. Hãy tạo mới!</div>';
-            }
-        } catch (error) {
-            console.error("Lỗi tải danh sách:", error);
-            listDiv.innerHTML = '<div class="alert alert-danger">Lỗi kết nối Firebase. Vui lòng thử lại.</div>';
-        }
+            } else { listDiv.innerHTML += '<div class="alert alert-info text-center">Chưa có danh sách nào. Hãy tạo mới!</div>'; }
+        } catch (error) { console.error("Lỗi tải danh sách:", error); listDiv.innerHTML = '<div class="alert alert-danger">Lỗi kết nối Firebase.</div>'; }
     }
 
-    // --- 7. LOGIC TẢI CHI TIẾT CHECKLIST (Fix lỗi bấm vào báo không có) ---
+    // --- 7. TẢI CHI TIẾT ---
     async function loadChecklistFor(id, type) {
-        // Cập nhật biến toàn cục để dùng cho các hàm khác
         currentCoordinatorId = id;
         checklistType = type;
-
         try {
-            // Hiển thị loading trước
-            // (Tuỳ chọn: có thể thêm loading spinner toàn màn hình nếu muốn)
-            
             const snapshot = await database.ref(`checklists/${type}/${id}`).once('value');
             currentChecklistData = snapshot.val();
-
             if (currentChecklistData) {
-                // Render dữ liệu lên UI
-                document.getElementById('acc-checklist-mainAppModalLabel').innerHTML = 
-                    `<i class="bi bi-person-badge"></i> Đang làm việc: <strong>${currentChecklistData.coordinatorName}</strong>`;
+                document.getElementById('acc-checklist-mainAppModalLabel').innerHTML = `<i class="bi bi-person-badge"></i> Đang làm việc: <strong>${currentChecklistData.coordinatorName}</strong>`;
                 document.getElementById('acc-checklist-mainTitle').innerText = currentChecklistData.coordinatorName;
                 document.getElementById('acc-checklist-currentMonth').innerText = `Tháng ${new Date().getMonth() + 1}/${new Date().getFullYear()}`;
-                
-                // Đóng modal chọn, Mở modal chính
                 selectionModal.hide();
                 renderTaskList();
                 mainAppModal.show();
-            } else {
-                alert("Không tìm thấy dữ liệu chi tiết! Có thể dữ liệu đã bị xóa.");
-                // Load lại danh sách để đồng bộ
-                loadList(type);
-            }
-        } catch (error) {
-            console.error("Lỗi tải chi tiết:", error);
-            alert("Lỗi khi tải dữ liệu chi tiết.");
-        }
+            } else { alert("Không tìm thấy dữ liệu."); loadList(type); }
+        } catch (error) { console.error("Lỗi tải chi tiết:", error); alert("Lỗi khi tải dữ liệu chi tiết."); }
     }
 
-    // --- 8. LOGIC RENDER & TASK (Hiển thị công việc) ---
+    // --- 8. RENDER LIST ---
     function renderTaskList() {
         const taskListDiv = document.getElementById('acc-checklist-taskList');
         taskListDiv.innerHTML = '';
-
         if (!currentChecklistData.tasks || currentChecklistData.tasks.length === 0) {
             taskListDiv.innerHTML = '<div class="text-center p-5 text-muted"><i class="bi bi-inbox fs-1"></i><p>Chưa có công việc nào.</p></div>';
-            updateDashboard();
-            return;
+            updateDashboard(); return;
         }
-
-        // Gom nhóm theo category
         const categories = [...new Set(currentChecklistData.tasks.map(t => t.category || "Khác"))];
-        
         categories.forEach(category => {
             const tasks = currentChecklistData.tasks.filter(t => (t.category || "Khác") === category);
-            
             const card = document.createElement('div');
             card.className = 'card acc-checklist-task-card border-0 shadow-sm';
-            
             let html = `
                 <div class="card-header bg-white text-primary border-bottom-0 pt-3">
                     <i class="bi bi-folder2-open"></i> ${category} <span class="badge bg-light text-secondary rounded-pill ms-2">${tasks.length}</span>
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">`;
-            
             tasks.forEach(task => {
                 let statusBadge, statusBtnColor, statusIcon;
                 if (task.status === 'completed') {
-                    statusBadge = '<span class="badge bg-success">Hoàn thành</span>';
-                    statusBtnColor = 'btn-success';
-                    statusIcon = 'bi-check-circle-fill';
+                    statusBadge = '<span class="badge bg-success">Hoàn thành</span>'; statusBtnColor = 'btn-success'; statusIcon = 'bi-check-circle-fill';
                 } else if (task.status === 'in-progress') {
-                    statusBadge = '<span class="badge bg-warning text-dark">Đang làm</span>';
-                    statusBtnColor = 'btn-warning';
-                    statusIcon = 'bi-play-circle-fill';
+                    statusBadge = '<span class="badge bg-warning text-dark">Đang làm</span>'; statusBtnColor = 'btn-warning'; statusIcon = 'bi-play-circle-fill';
                 } else {
-                    statusBadge = '<span class="badge bg-secondary">Chưa làm</span>';
-                    statusBtnColor = 'btn-outline-secondary';
-                    statusIcon = 'bi-circle';
+                    statusBadge = '<span class="badge bg-secondary">Chưa làm</span>'; statusBtnColor = 'btn-outline-secondary'; statusIcon = 'bi-circle';
                 }
-
                 html += `
                     <li class="list-group-item p-3 border-start-0 border-end-0">
                         <div class="d-flex justify-content-between align-items-start">
@@ -479,9 +433,7 @@
                             </div>
                             <div class="d-flex flex-column align-items-end gap-2">
                                 <div class="dropdown">
-                                    <button class="btn ${statusBtnColor} btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        <i class="bi ${statusIcon}"></i>
-                                    </button>
+                                    <button class="btn ${statusBtnColor} btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="bi ${statusIcon}"></i></button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow">
                                         <li><a class="dropdown-item" href="#" onclick="updateTaskStatus(${task.id}, 'not-started')"><i class="bi bi-circle"></i> Chưa làm</a></li>
                                         <li><a class="dropdown-item" href="#" onclick="updateTaskStatus(${task.id}, 'in-progress')"><i class="bi bi-play-circle text-warning"></i> Đang làm</a></li>
@@ -494,7 +446,6 @@
                         </div>
                     </li>`;
             });
-            
             html += `</ul></div>`;
             card.innerHTML = html;
             taskListDiv.appendChild(card);
@@ -502,9 +453,9 @@
         updateDashboard();
     }
 
-    // --- 9. CÁC HÀM XỬ LÝ (Create, Update, Delete) ---
+    // --- 9. LOGIC XỬ LÝ (CRUD) ---
     function openNewAccountantModal(type) {
-        checklistType = type; // Set type trước khi tạo
+        checklistType = type;
         const title = (type === 'coordinator') ? 'Kho & Giao nhận' : 'Phụ trách SOP';
         document.getElementById('acc-checklist-newModalLabel').innerText = `Nhập tên người phụ trách (${title}):`;
         document.getElementById('acc-checklist-newAccountantNameInput').value = '';
@@ -514,203 +465,183 @@
     async function createNewChecklist() {
         const name = document.getElementById('acc-checklist-newAccountantNameInput').value.trim();
         if (!name) return alert('Vui lòng nhập tên!');
-        
         const id = slugify(name);
         const ref = database.ref(`checklists/${checklistType}/${id}`);
-        
-        // Kiểm tra trùng
         const snap = await ref.once('value');
         if (snap.exists()) return alert('Tên này đã tồn tại!');
-
-        // Lấy data mẫu
         const tasks = (checklistType === 'coordinator') ? initialTasksCoordinator : initialTasksSOP;
-        
-        // Save
-        await ref.set({
-            id: id,
-            coordinatorName: name,
-            creationDate: new Date().toLocaleDateString('vi-VN'),
-            tasks: JSON.parse(JSON.stringify(tasks)) // Deep copy
-        });
-
-        newAccountantModal.hide();
-        loadList(checklistType); // Refresh list
+        await ref.set({ id: id, coordinatorName: name, creationDate: new Date().toLocaleDateString('vi-VN'), tasks: JSON.parse(JSON.stringify(tasks)) });
+        newAccountantModal.hide(); loadList(checklistType);
     }
 
-    // Xác nhận xóa checklist (Fix lỗi xóa không được)
-    function confirmDelete(id, name, type) {
-        deleteTargetId = id;
-        deleteTargetType = type;
-        document.getElementById('acc-checklist-deleteMessage').innerText = `Bạn có chắc chắn muốn xóa dữ liệu của "${name}"? Hành động này không thể hoàn tác.`;
-        deleteConfirmModal.show();
-    }
+    function confirmDelete(id, name, type) { deleteTargetId = id; deleteTargetType = type; document.getElementById('acc-checklist-deleteMessage').innerText = `Xóa dữ liệu của "${name}"?`; deleteConfirmModal.show(); }
+    async function executeDelete(id, type) { try { await database.ref(`checklists/${type}/${id}`).remove(); deleteConfirmModal.hide(); deleteTargetId = null; loadList(type); } catch (err) { alert('Lỗi khi xóa.'); } }
 
-    async function executeDelete(id, type) {
-        try {
-            await database.ref(`checklists/${type}/${id}`).remove();
-            deleteConfirmModal.hide();
-            // Reset biến
-            deleteTargetId = null;
-            deleteTargetType = null;
-            // Load lại danh sách
-            loadList(type); 
-        } catch (err) {
-            console.error(err);
-            alert('Lỗi khi xóa dữ liệu.');
-        }
-    }
-
-    // Add Task (Fix lỗi dropdown rỗng)
-    function openAddTaskModal() {
-        addTaskModal.show();
-    }
-
+    function openAddTaskModal() { addTaskModal.show(); }
     function populateTaskCategories() {
         const select = document.getElementById('acc-checklist-taskCategory');
         select.innerHTML = '<option value="" disabled selected>Chọn phân loại...</option>';
-        
-        // Lấy nguồn category từ template gốc để luôn đầy đủ
         const source = (checklistType === 'sop') ? initialTasksSOP : initialTasksCoordinator;
         const categories = new Set(source.map(t => t.category));
-        
-        // Cộng thêm category đang có (nếu người dùng tự thêm trước đó)
-        if (currentChecklistData && currentChecklistData.tasks) {
-            currentChecklistData.tasks.forEach(t => { if(t.category) categories.add(t.category); });
-        }
-
-        categories.forEach(c => {
-            const opt = document.createElement('option');
-            opt.value = c; opt.innerText = c;
-            select.appendChild(opt);
-        });
-
-        // Reset form inputs
-        document.getElementById('acc-checklist-taskName').value = '';
-        document.getElementById('acc-checklist-taskDeadline').value = '';
+        if (currentChecklistData && currentChecklistData.tasks) currentChecklistData.tasks.forEach(t => { if(t.category) categories.add(t.category); });
+        categories.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; select.appendChild(opt); });
+        document.getElementById('acc-checklist-taskName').value = ''; document.getElementById('acc-checklist-taskDeadline').value = '';
     }
 
     async function addTask() {
         const name = document.getElementById('acc-checklist-taskName').value.trim();
         const cat = document.getElementById('acc-checklist-taskCategory').value;
         const dead = document.getElementById('acc-checklist-taskDeadline').value;
-        
         if (!name || !cat) return alert('Vui lòng nhập tên và chọn phân loại!');
-
         if (!currentChecklistData.tasks) currentChecklistData.tasks = [];
-        
-        // Tìm max ID
         const maxId = currentChecklistData.tasks.reduce((max, t) => Math.max(max, t.id), 0);
-        
-        currentChecklistData.tasks.push({
-            id: maxId + 1,
-            category: cat,
-            name: name,
-            deadline: dead,
-            status: 'not-started',
-            notes: ''
-        });
-
-        await saveCurrentData();
-        addTaskModal.hide();
-        renderTaskList();
+        currentChecklistData.tasks.push({ id: maxId + 1, category: cat, name: name, deadline: dead, status: 'not-started', notes: '' });
+        await saveCurrentData(); addTaskModal.hide(); renderTaskList();
     }
 
-    // Update Status & Notes
-    async function updateTaskStatus(taskId, status) {
-        const task = currentChecklistData.tasks.find(t => t.id === taskId);
-        if (task) {
-            task.status = status;
-            await saveCurrentData();
-            renderTaskList();
-        }
-    }
+    async function updateTaskStatus(taskId, status) { const task = currentChecklistData.tasks.find(t => t.id === taskId); if (task) { task.status = status; await saveCurrentData(); renderTaskList(); } }
+    function showCompletionNotesModal(taskId) { currentTaskForCompletion = taskId; document.getElementById('acc-checklist-completionNotes').value = ''; document.getElementById('acc-checklist-notesValidation').innerText = ''; completionNotesModal.show(); }
+    function validateCompletionNotes() { const len = document.getElementById('acc-checklist-completionNotes').value.length; const msg = document.getElementById('acc-checklist-notesValidation'); if (len < 20) { msg.innerText = `Cần thêm ${20 - len} ký tự.`; document.getElementById('acc-checklist-saveCompletionBtn').disabled = true; } else { msg.innerText = ''; document.getElementById('acc-checklist-saveCompletionBtn').disabled = false; } }
+    async function saveCompletionWithNotes() { const notes = document.getElementById('acc-checklist-completionNotes').value; if (notes.length < 20) return; const task = currentChecklistData.tasks.find(t => t.id === currentTaskForCompletion); if (task) { task.status = 'completed'; task.notes = notes; await saveCurrentData(); completionNotesModal.hide(); renderTaskList(); } }
+    function deleteTask(taskId) { if(confirm('Xóa công việc này?')) { currentChecklistData.tasks = currentChecklistData.tasks.filter(t => t.id !== taskId); saveCurrentData().then(renderTaskList); } }
+    async function saveCurrentData() { if (!currentCoordinatorId || !checklistType) return; await database.ref(`checklists/${checklistType}/${currentCoordinatorId}/tasks`).set(currentChecklistData.tasks); }
 
-    function showCompletionNotesModal(taskId) {
-        currentTaskForCompletion = taskId;
-        document.getElementById('acc-checklist-completionNotes').value = '';
-        document.getElementById('acc-checklist-notesValidation').innerText = '';
-        completionNotesModal.show();
-    }
-
-    function validateCompletionNotes() {
-        const len = document.getElementById('acc-checklist-completionNotes').value.length;
-        const msg = document.getElementById('acc-checklist-notesValidation');
-        if (len < 20) {
-            msg.innerText = `Cần thêm ${20 - len} ký tự nữa.`;
-            document.getElementById('acc-checklist-saveCompletionBtn').disabled = true;
-        } else {
-            msg.innerText = '';
-            document.getElementById('acc-checklist-saveCompletionBtn').disabled = false;
-        }
-    }
-
-    async function saveCompletionWithNotes() {
-        const notes = document.getElementById('acc-checklist-completionNotes').value;
-        if (notes.length < 20) return;
-
-        const task = currentChecklistData.tasks.find(t => t.id === currentTaskForCompletion);
-        if (task) {
-            task.status = 'completed';
-            task.notes = notes; // Lưu ghi chú
-            await saveCurrentData();
-            completionNotesModal.hide();
-            renderTaskList();
-        }
-    }
-
-    function deleteTask(taskId) {
-        if(confirm('Xóa công việc này?')) {
-            currentChecklistData.tasks = currentChecklistData.tasks.filter(t => t.id !== taskId);
-            saveCurrentData().then(renderTaskList);
-        }
-    }
-
-    // Hàm Save chung
-    async function saveCurrentData() {
-        if (!currentCoordinatorId || !checklistType) return;
-        await database.ref(`checklists/${checklistType}/${currentCoordinatorId}/tasks`).set(currentChecklistData.tasks);
-    }
-
-    // --- 10. TIỆN ÍCH KHÁC (Dashboard, Report, Back) ---
     function updateDashboard() {
         if (!currentChecklistData.tasks) return;
         const total = currentChecklistData.tasks.length;
         const completed = currentChecklistData.tasks.filter(t => t.status === 'completed').length;
         const processing = currentChecklistData.tasks.filter(t => t.status === 'in-progress').length;
         const pending = total - completed - processing;
-        
         document.getElementById('acc-checklist-totalTasks').innerText = total;
         document.getElementById('acc-checklist-completedTasks').innerText = completed;
         document.getElementById('acc-checklist-inProgressTasks').innerText = processing;
         document.getElementById('acc-checklist-notStartedTasks').innerText = pending;
-        
         const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
-        const bar = document.getElementById('acc-checklist-totalProgressBar');
-        bar.style.width = `${pct}%`;
-        bar.innerText = `${pct}%`;
+        const bar = document.getElementById('acc-checklist-totalProgressBar'); bar.style.width = `${pct}%`; bar.innerText = `${pct}%`;
     }
 
-    function generateReport() {
-        // (Giữ nguyên logic tạo báo cáo text của bạn)
+    // --- 10. TẠO NỘI DUNG PDF BÁO CÁO (ĐƯỢC LÀM MỚI HOÀN TOÀN) ---
+    function generatePDFReportContent() {
         if (!currentChecklistData || !currentChecklistData.tasks) return;
-        let content = `BÁO CÁO: ${currentChecklistData.coordinatorName.toUpperCase()}\nNgày: ${new Date().toLocaleDateString()}\n\n`;
-        // ... (Logic tạo string báo cáo đơn giản) ...
-        const done = currentChecklistData.tasks.filter(t => t.status === 'completed');
-        content += `[ĐÃ HOÀN THÀNH: ${done.length}]\n`;
-        done.forEach(t => content += `- ${t.name} (${t.notes || 'Không ghi chú'})\n`);
         
-        const todo = currentChecklistData.tasks.filter(t => t.status !== 'completed');
-        content += `\n[CẦN LÀM: ${todo.length}]\n`;
-        todo.forEach(t => content += `- ${t.name}\n`);
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+        const total = currentChecklistData.tasks.length;
+        const completed = currentChecklistData.tasks.filter(t => t.status === 'completed').length;
+        const inProgress = currentChecklistData.tasks.filter(t => t.status === 'in-progress').length;
+        const notStarted = total - completed - inProgress;
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
         
-        document.getElementById('acc-checklist-reportContent').innerText = content;
+        // Xác định tiêu đề dựa trên loại checklist
+        let reportTitle = checklistType === 'coordinator' ? "BÁO CÁO KHO & GIAO NHẬN" : "BÁO CÁO GIÁM SÁT SOP";
+
+        let html = `
+            <div class="report-header">
+                <h3 class="report-title">${reportTitle}</h3>
+                <p class="mb-0"><strong>Người phụ trách:</strong> ${currentChecklistData.coordinatorName}</p>
+                <p class="report-sub-info">Ngày xuất báo cáo: ${now.toLocaleDateString('vi-VN')} - Kỳ: Tháng ${month}/${year}</p>
+            </div>
+            
+            <div class="card mb-4 border-0 shadow-sm" style="background-color: #f8f9fa;">
+                <div class="card-body">
+                    <h5 class="card-title text-center text-primary mb-3">TỔNG QUAN TIẾN ĐỘ</h5>
+                    <div class="row text-center">
+                        <div class="col-3 border-end">
+                            <h2 class="text-primary mb-0">${total}</h2>
+                            <small class="text-muted">Tổng việc</small>
+                        </div>
+                        <div class="col-3 border-end">
+                            <h2 class="text-success mb-0">${completed}</h2>
+                            <small class="text-muted">Hoàn thành (${percentage}%)</small>
+                        </div>
+                        <div class="col-3 border-end">
+                            <h2 class="text-warning mb-0">${inProgress}</h2>
+                            <small class="text-muted">Đang làm</small>
+                        </div>
+                        <div class="col-3">
+                            <h2 class="text-danger mb-0">${notStarted}</h2>
+                            <small class="text-muted">Chưa làm</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <h5 class="text-center text-uppercase fw-bold mt-4 mb-3" style="color: #004a99;">CHI TIẾT CÔNG VIỆC</h5>
+        `;
+
+        // Gom nhóm theo category để hiển thị trong PDF
+        const categories = [...new Set(currentChecklistData.tasks.map(t => t.category || "Khác"))];
+        
+        categories.forEach(category => {
+            const tasksInCat = currentChecklistData.tasks.filter(t => (t.category || "Khác") === category);
+            
+            html += `<div class="report-section-header">${category}</div>`;
+            html += `
+                <table class="table table-bordered table-sm mt-2" style="font-size: 13px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50%">Tên công việc</th>
+                            <th style="width: 15%">Trạng thái</th>
+                            <th style="width: 35%">Ghi chú / Kết quả</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            tasksInCat.forEach(task => {
+                let statusText = '', statusClass = '';
+                if (task.status === 'completed') { statusText = 'Hoàn thành'; statusClass = 'text-success fw-bold'; }
+                else if (task.status === 'in-progress') { statusText = 'Đang làm'; statusClass = 'text-warning fw-bold'; }
+                else { statusText = 'Chưa làm'; statusClass = 'text-secondary'; }
+                
+                html += `
+                    <tr>
+                        <td>${task.name}</td>
+                        <td class="${statusClass}">${statusText}</td>
+                        <td>${task.notes || ''}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `</tbody></table>`;
+        });
+
+        document.getElementById('acc-checklist-reportContent').innerHTML = html;
     }
 
-    function copyReport() {
-        const text = document.getElementById('acc-checklist-reportContent').innerText;
-        navigator.clipboard.writeText(text);
-        alert('Đã copy!');
-    }
+    // --- 11. HÀM XUẤT PDF ---
+    window.exportToPDF = function() {
+        const element = document.getElementById('acc-checklist-reportContent');
+        if (!currentChecklistData) return;
+        
+        // Cấu hình tên file
+        let prefix = checklistType === 'coordinator' ? "KhoVan" : "SOP";
+        let fileName = `BaoCao_${prefix}_${slugify(currentChecklistData.coordinatorName)}_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.pdf`;
+
+        const opt = {
+            margin:       10, // lề mm
+            filename:     fileName,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true }, 
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        const btn = document.querySelector('button[onclick="exportToPDF()"]');
+        const oldText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang tạo PDF...';
+        btn.disabled = true;
+
+        html2pdf().set(opt).from(element).save().then(() => {
+            btn.innerHTML = oldText;
+            btn.disabled = false;
+        }).catch(err => {
+            console.error(err);
+            alert("Lỗi khi xuất PDF");
+            btn.innerHTML = oldText;
+            btn.disabled = false;
+        });
+    };
 
     async function confirmRefreshChecklist() {
         if(confirm('Làm mới toàn bộ trạng thái về "Chưa làm"?')) {
@@ -720,14 +651,7 @@
         }
     }
 
-    function backToSelection() {
-        mainAppModal.hide();
-        loadList(checklistType); // Refresh lại list để cập nhật mới nhất
-        selectionModal.show();
-    }
-
-    // Bind event show modal report
-    document.getElementById('acc-checklist-reportModal').addEventListener('show.bs.modal', generateReport);
+    function backToSelection() { mainAppModal.hide(); loadList(checklistType); selectionModal.show(); }
 
     </script>
 </body>
