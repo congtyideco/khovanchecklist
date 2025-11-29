@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Vận Hành & SOP Pro - Xuất PDF</title>
+    <title>Quản lý Vận Hành & SOP Pro - Quản trị Mục tiêu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body { background-color: #f0f2f5; font-size: 14px; }
         .acc-checklist-dashboard { position: sticky; top: 20px; }
-        .acc-checklist-status-select { font-weight: bold; }
         
-        /* Cải tiến hiển thị cho Report Modal để xuất PDF đẹp */
+        /* Styles cho báo cáo PDF */
         #acc-checklist-reportModal .modal-body { 
             background-color: #fff; 
             padding: 30px; 
@@ -30,6 +29,7 @@
             text-transform: uppercase;
         }
 
+        /* Floating Button */
         .acc-checklist-floating-btn {
             background-color: #004a99; color: white; border: 2px solid white; border-radius: 25px;
             padding: 10px 15px; font-weight: bold; box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
@@ -39,6 +39,7 @@
         .acc-checklist-floating-btn i { margin-right: 8px; font-size: 1.3rem; }
         #acc-checklist-floatingBtn { background-color: #dc3545; }
 
+        /* Modal & Layout */
         #acc-checklist-mainAppModal .modal-dialog { max-width: 95vw; width: 1600px; }
         #acc-checklist-mainAppModal .modal-content { height: 90vh; }
         #acc-checklist-mainAppModal .modal-body { overflow-y: auto; background-color: #f8f9fa; }
@@ -55,8 +56,55 @@
         .rounded { border-radius: 0.5rem !important; }
         .shadow { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; }
         
-        .acc-checklist-task-name { word-break: break-word; }
+        .acc-checklist-task-name { word-break: break-word; font-weight: 600; font-size: 1.05rem; }
         .acc-checklist-notes-validation { color: #dc3545; font-size: 12px; margin-top: 5px; }
+
+        /* === STYLE CHO PLANNER POPUP === */
+        #acc-checklist-plannerModal .modal-dialog { max-width: 98vw; margin: 1vw auto; }
+        #acc-checklist-plannerModal .modal-content { height: 96vh; }
+        #acc-checklist-plannerModal .modal-body { overflow-y: auto; background-color: #f0f2f5; padding: 10px; }
+        .planner-day-container {
+            background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; overflow: hidden;
+        }
+        .planner-day-header {
+            background-color: #004a99; color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .planner-day-title { font-weight: bold; font-size: 1.1rem; margin: 0; }
+        .planner-table input.form-control { border: none; border-radius: 0; background: transparent; }
+        .planner-table input.form-control:focus { box-shadow: none; background: #fff; }
+        
+        .planner-row-done { background-color: #ffebee !important; color: #c62828; }
+        .planner-row-done input { color: #c62828 !important; text-decoration: line-through; }
+
+        /* === STYLE MỚI: MỤC TIÊU CÔNG VIỆC === */
+        .planner-objective-box {
+            background-color: #e3f2fd; border: 1px solid #90caf9; border-radius: 8px; padding: 15px; margin-bottom: 20px;
+        }
+        .planner-objective-label { font-weight: bold; color: #0d47a1; margin-bottom: 5px; display: block; }
+        .planner-objective-input {
+            width: 100%; border: 1px solid #bbdefb; border-radius: 4px; padding: 8px; font-size: 1.1rem; color: #0d47a1;
+        }
+        .planner-objective-input:focus { outline: none; border-color: #2196f3; box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1); }
+
+        /* === CẢNH BÁO THÔNG MINH === */
+        #smart-alert-container {
+            display: none; background-color: #dc3545; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4); animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+        .smart-alert-title { font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; }
+        .smart-alert-list { margin-top: 10px; margin-bottom: 0; padding-left: 20px; }
+        .smart-alert-list li { font-weight: 500; font-size: 1.1rem; }
+        
+        .task-overdue-badge {
+            background-color: #dc3545; color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px;
+            margin-left: 8px; font-weight: bold; animation: blink 1.5s infinite; display: inline-flex; align-items: center; vertical-align: middle;
+        }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -123,6 +171,19 @@
                             <h2 id="acc-checklist-mainTitle"></h2>
                             <h5 id="acc-checklist-currentMonth"></h5>
                         </div>
+
+                        <div id="smart-alert-container">
+                            <div class="smart-alert-title">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> 
+                                CẢNH BÁO: PHÁT HIỆN CÔNG VIỆC TRONG KẾ HOẠCH BỊ TRỄ HẠN!
+                            </div>
+                            <ul id="smart-alert-list" class="smart-alert-list">
+                                </ul>
+                            <div class="mt-2 text-end">
+                                <small style="font-style: italic;">(Các mục này sẽ BỊ KHÓA trạng thái Hoàn thành cho đến khi bạn xử lý xong trong Kế hoạch chi tiết)</small>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-lg-3">
                                 <div class="card acc-checklist-dashboard">
@@ -160,6 +221,23 @@
         </div>
     </div>
 
+    <div class="modal fade" id="acc-checklist-plannerModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title"><i class="bi bi-calendar-week"></i> KẾ HOẠCH CHI TIẾT TUẦN - <span id="planner-task-title-display" style="font-weight:bold; color: #fff; text-transform: uppercase;"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" onclick="closePlannerModal()"></button>
+                </div>
+                <div class="modal-body" id="planner-body-content">
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closePlannerModal()">Quay lại Checklist</button>
+                    <button type="button" class="btn btn-primary" onclick="savePlannerData()"><i class="bi bi-save"></i> Lưu Kế Hoạch</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="acc-checklist-newAccountantModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -189,7 +267,6 @@
                                 <option value="" disabled selected>Chọn phân loại...</option>
                             </select>
                         </div>
-                        <div class="mb-3"><label for="acc-checklist-taskDeadline" class="form-label">Hạn chót (Tùy chọn)</label><input type="date" class="form-control" id="acc-checklist-taskDeadline"></div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -263,7 +340,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <script>
-    // --- 1. CẤU HÌNH FIREBASE ---
+    // --- 1. CẤU HÌNH FIREBASE (Của Kho Vận) ---
     const firebaseConfig = {
         apiKey: "AIzaSyBD8aIBY5OARTj4TfhhzoasImK0CkXqGGY",
         authDomain: "khovanchecklist.firebaseapp.com",
@@ -283,38 +360,46 @@
     let currentCoordinatorId = null;
     let currentChecklistData = null;
     let checklistType = null; // 'coordinator' hoặc 'sop'
-    let selectionModal, mainAppModal, newAccountantModal, addTaskModal, deleteConfirmModal, completionNotesModal;
+    let selectionModal, mainAppModal, newAccountantModal, addTaskModal, deleteConfirmModal, completionNotesModal, plannerModal;
     let currentTaskForCompletion = null;
     let deleteTargetId = null; 
     let deleteTargetType = null;
+    let currentPlannerTaskId = null;
+    let currentPlannerData = {};
+
+    const PLANNER_DAYS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"];
+    const DAY_INDEX_MAP = {
+        "Thứ 2": 1, "Thứ 3": 2, "Thứ 4": 3, "Thứ 5": 4, 
+        "Thứ 6": 5, "Thứ 7": 6, "Chủ Nhật": 7
+    };
 
     // --- 3. DỮ LIỆU MẪU ---
     const initialTasksCoordinator = [
-        { id: 1, category: 'Đầu kỳ - Chuẩn bị', name: 'Kiểm kê tồn kho đầu kỳ và đối chiếu số liệu', status: 'not-started', notes: '', deadline: '' },
-        { id: 2, category: 'Đầu kỳ - Chuẩn bị', name: 'Rà soát danh sách khách hàng, tuyến giao hàng, khu vực', status: 'not-started', notes: '', deadline: '' },
-        { id: 3, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Thực hiện điều phối nhận hàng trong ngày/tuần', status: 'not-started', notes: '', deadline: '' },
-        { id: 4, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Thực hiện phối hợp kiểm tra- khai thủ tục nhập kho', status: 'not-started', notes: '', deadline: '' },
-        { id: 5, category: 'Trong kỳ - Điều phối & Xuất hàng', name: 'Thực hiện việc kiểm hàng - nhập dữ liệu đóng gói', status: 'not-started', notes: '', deadline: '' },
-        { id: 6, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Kiểm tra phiếu xuất kho - in tem nhãn giao nhận', status: 'not-started', notes: '', deadline: '' },
-        { id: 7, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Giao hàng trong ngày - nhập liệu giao hàng', status: 'not-started', notes: '', deadline: '' },
-        { id: 8, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Công tác thu tiền- kiểm tra đối soát thu tiền', status: 'not-started', notes: '', deadline: '' },
-        { id: 9, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Giải quyết vấn đề phát sinh (hủy đơn, đổi trả...)', status: 'not-started', notes: '', deadline: '' },
-        { id:10, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Thực hiện nhiệm vụ giao trong tuần/phát sinh', status: 'not-started', notes: '', deadline: '' },
-        { id: 11, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Đối chiếu số liệu kho - kiểm kho - sắp xếp kho', status: 'not-started', notes: '', deadline: '' },
-        { id: 12, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Kiểm tra và sắp xếp chứng từ, hóa đơn', status: 'not-started', notes: '', deadline: '' },
-        { id: 13, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Báo cáo điều kiện bảo quản (nhiệt độ, độ ẩm)', status: 'not-started', notes: '', deadline: '' },
-        { id: 14, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Báo cáo KPI - cập nhật số liệu trong kỳ', status: 'not-started', notes: '', deadline: '' }
+        { id: 1, category: 'Công việc kho chung ', name: ' Định kỳ kiểm tra lại số liệu kê khai SOP về kho: nhiệt độ - lập phiếu thuốc in lưu ', status: 'not-started', notes: '' },
+        { id: 2, category: 'Công việc kho chung', name: 'Định kỳ kiểm tra form SOP giao nhận theo mẫu : kê khai - in lưu - điều chỉnh nếu có', status: 'not-started', notes: '' },
+        { id: 3, category: 'Trong kỳ - Điều phói xuất nhập kho', name: 'Thực hiện điều phối nhận hàng - lập phiếu - khai dữ liệu kho  theo SOP', status: 'not-started', notes: '' },
+        { id: 4, category: 'Trong kỳ - Điều phói xuất nhập kho', name: 'Phối hợp kiểm hàng- kiểm phiếu - nhập liệu phần mềm - cập nhật kế toán số liệu phát sinh', status: 'not-started', notes: '' },
+        { id: 5, category: 'Trong kỳ - Điều phói xuất nhập kho', name: 'Thực hiện việc kiểm hàng - nhập dữ liệu đóng gói vào dữ liệu - kiểm tra tồn cuối kỷ', status: 'not-started', notes: '' },
+        { id: 6, category: 'Trong kỳ - Điều phói xuất nhập kho', name: 'Kiểm tra phiếu xuất kho - in tem nhãn giao nhận', status: 'not-started', notes: '' },
+        { id: 7, category: 'Trong kỳ - Điều phói xuất nhập kho', name: 'Giao hàng trong ngày - nhập liệu giao hàng - khai báo số liệu giao hàng ', status: 'not-started', notes: '' },
+        { id: 8, category: 'Trong kỳ - Điều phói xuất nhập kho', name: 'Công tác thu tiền- kiểm tra đối soát thu tiền', status: 'not-started', notes: '' },
+        { id: 9, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Giải quyết vấn đề phát sinh (hủy đơn, đổi trả...)', status: 'not-started', notes: '' },
+        { id:10, category: 'Trong kỳ - Giao hàng & Thu tiền', name: 'Thực hiện nhiệm vụ giao trong tuần/phát sinh', status: 'not-started', notes: '' },
+        { id: 11, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Đối chiếu số liệu kho - kiểm kho - sắp xếp kho', status: 'not-started', notes: '' },
+        { id: 12, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Kiểm tra và sắp xếp chứng từ, hóa đơn', status: 'not-started', notes: '' },
+        { id: 13, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Báo cáo điều kiện bảo quản (nhiệt độ, độ ẩm)', status: 'not-started', notes: '' },
+        { id: 14, category: 'Cuối kỳ - Báo cáo & Tổng kết', name: 'Báo cáo KPI - cập nhật số liệu trong kỳ', status: 'not-started', notes: '' }
     ];
 
     const initialTasksSOP = [
-        { id: 1, category: 'Hàng ngày', name: 'Kiểm tra quy trình xuất - nhập thuốc - báo cáo', status: 'not-started', notes: '', deadline: '' },
-        { id: 2, category: 'Hàng ngày', name: 'Giám sát quá trình đóng gói và vận chuyển', status: 'not-started', notes: '', deadline: '' },
-        { id: 3, category: 'Hàng tuần', name: 'Kiểm tra/khai báo nhiệt độ - độ ẩm kho', status: 'not-started', notes: '', deadline: '' },
-        { id: 4, category: 'Hàng tuần', name: 'Xử lý các sai lệch điều kiện bảo quản', status: 'not-started', notes: '', deadline: '' },
-        { id: 5, category: 'Hàng tuần', name: 'Đánh giá danh mục thuốc kinh doanh - báo cáo BGD', status: 'not-started', notes: '', deadline: '' },
-        { id: 6, category: 'Hàng tuần', name: 'Giải quyết sự cố, khiếu nại chất lượng thuốc', status: 'not-started', notes: '', deadline: '' },
-        { id: 7, category: 'Hàng tuần', name: 'Xử lý thủ tục form quản lý quy trình thuốc', status: 'not-started', notes: '', deadline: '' },
-        { id: 8, category: 'Hàng tuần', name: 'Báo cáo công tác theo dõi SOP', status: 'not-started', notes: '', deadline: '' }
+        { id: 1, category: 'Hàng ngày', name: 'Kiểm tra quy trình xuất - nhập thuốc - báo cáo', status: 'not-started', notes: '' },
+        { id: 2, category: 'Hàng ngày', name: 'Giám sát quá trình đóng gói và vận chuyển', status: 'not-started', notes: '' },
+        { id: 3, category: 'Hàng tuần', name: 'Kiểm tra/khai báo nhiệt độ - độ ẩm kho', status: 'not-started', notes: '' },
+        { id: 4, category: 'Hàng tuần', name: 'Xử lý các sai lệch điều kiện bảo quản', status: 'not-started', notes: '' },
+        { id: 5, category: 'Hàng tuần', name: 'Đánh giá danh mục thuốc kinh doanh - báo cáo BGD', status: 'not-started', notes: '' },
+        { id: 6, category: 'Hàng tuần', name: 'Giải quyết sự cố, khiếu nại chất lượng thuốc', status: 'not-started', notes: '' },
+        { id: 7, category: 'Hàng tuần', name: 'Xử lý thủ tục form quản lý quy trình thuốc', status: 'not-started', notes: '' },
+        { id: 8, category: 'Hàng tuần', name: 'Báo cáo công tác theo dõi SOP', status: 'not-started', notes: '' }
     ];
     
     // --- 4. KHỞI TẠO ---
@@ -325,6 +410,7 @@
         addTaskModal = new bootstrap.Modal(document.getElementById('acc-checklist-addTaskModal'));
         deleteConfirmModal = new bootstrap.Modal(document.getElementById('acc-checklist-deleteConfirmModal'));
         completionNotesModal = new bootstrap.Modal(document.getElementById('acc-checklist-completionNotesModal'));
+        plannerModal = new bootstrap.Modal(document.getElementById('acc-checklist-plannerModal'));
         
         document.getElementById('acc-checklist-saveCompletionBtn').addEventListener('click', saveCompletionWithNotes);
         document.getElementById('acc-checklist-completionNotes').addEventListener('input', validateCompletionNotes);
@@ -336,7 +422,6 @@
             }
         });
 
-        // BIND EVENT CHO MODAL BÁO CÁO (Đã nâng cấp)
         document.getElementById('acc-checklist-reportModal').addEventListener('show.bs.modal', generatePDFReportContent);
     });
 
@@ -345,6 +430,7 @@
     function showCoordinatorSelection() { checklistType = 'coordinator'; document.getElementById('current-list-title').innerText = "Danh sách Kho & Giao nhận"; loadList('coordinator'); }
     function showSOPSelection() { checklistType = 'sop'; document.getElementById('current-list-title').innerText = "Danh sách Phụ trách SOP"; loadList('sop'); }
     function slugify(text) { return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, ''); }
+    function getCurrentDayIndex() { const d = new Date(); const day = d.getDay(); return day === 0 ? 7 : day; }
 
     // --- 6. TẢI DANH SÁCH ---
     async function loadList(type) {
@@ -395,7 +481,7 @@
         } catch (error) { console.error("Lỗi tải chi tiết:", error); alert("Lỗi khi tải dữ liệu chi tiết."); }
     }
 
-    // --- 8. RENDER LIST ---
+    // --- 8. RENDER LIST (CÓ PLANNER BUTTON & BADGE) ---
     function renderTaskList() {
         const taskListDiv = document.getElementById('acc-checklist-taskList');
         taskListDiv.innerHTML = '';
@@ -423,23 +509,33 @@
                 } else {
                     statusBadge = '<span class="badge bg-secondary">Chưa làm</span>'; statusBtnColor = 'btn-outline-secondary'; statusIcon = 'bi-circle';
                 }
+
+                // Hiển thị Badge Trễ hạn
+                const overdueBadge = isTaskOverdue(task) 
+                        ? `<span class="task-overdue-badge"><i class="bi bi-exclamation-octagon-fill"></i> CÓ VIỆC TRỄ HẠN</span>` 
+                        : '';
+
                 html += `
                     <li class="list-group-item p-3 border-start-0 border-end-0">
                         <div class="d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1 me-3">
-                                <div class="fw-bold mb-1 acc-checklist-task-name">${task.name}</div>
-                                ${task.deadline ? `<small class="text-danger me-2"><i class="bi bi-calendar-event"></i> ${task.deadline}</small>` : ''}
+                                <div class="acc-checklist-task-name">${task.name} ${overdueBadge}</div>
                                 ${task.notes ? `<div class="mt-1 p-2 bg-light rounded small text-muted fst-italic"><i class="bi bi-sticky"></i> ${task.notes}</div>` : ''}
                             </div>
                             <div class="d-flex flex-column align-items-end gap-2">
-                                <div class="dropdown">
-                                    <button class="btn ${statusBtnColor} btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="bi ${statusIcon}"></i></button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                                        <li><a class="dropdown-item" href="#" onclick="updateTaskStatus(${task.id}, 'not-started')"><i class="bi bi-circle"></i> Chưa làm</a></li>
-                                        <li><a class="dropdown-item" href="#" onclick="updateTaskStatus(${task.id}, 'in-progress')"><i class="bi bi-play-circle text-warning"></i> Đang làm</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item fw-bold text-success" href="#" onclick="showCompletionNotesModal(${task.id})"><i class="bi bi-check-circle-fill"></i> Hoàn thành</a></li>
-                                    </ul>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-dark btn-sm text-white fw-bold" onclick="openPlanner(${task.id})">
+                                        <i class="bi bi-calendar-check"></i> Lập KH
+                                    </button>
+                                    <div class="dropdown">
+                                        <button class="btn ${statusBtnColor} btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><i class="bi ${statusIcon}"></i></button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                                            <li><a class="dropdown-item" href="#" onclick="updateTaskStatus(${task.id}, 'not-started')"><i class="bi bi-circle"></i> Chưa làm</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="updateTaskStatus(${task.id}, 'in-progress')"><i class="bi bi-play-circle text-warning"></i> Đang làm</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item fw-bold text-success" href="#" onclick="checkAndCompleteTask(${task.id})"><i class="bi bi-check-circle-fill"></i> Hoàn thành</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
                                 <button class="btn btn-light btn-sm text-danger" onclick="deleteTask(${task.id})" title="Xóa task"><i class="bi bi-trash"></i></button>
                             </div>
@@ -453,7 +549,152 @@
         updateDashboard();
     }
 
-    // --- 9. LOGIC XỬ LÝ (CRUD) ---
+    // --- 9. PLANNER LOGIC & SMART CHECK ---
+    function openPlanner(taskId) {
+        currentPlannerTaskId = taskId;
+        const task = currentChecklistData.tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        currentPlannerData = task.weeklyPlan ? JSON.parse(JSON.stringify(task.weeklyPlan)) : {};
+        if (!currentPlannerData.objective) currentPlannerData.objective = '';
+
+        PLANNER_DAYS.forEach(day => {
+            if (!currentPlannerData[day]) currentPlannerData[day] = [];
+        });
+
+        document.getElementById('planner-task-title-display').innerText = task.name;
+        renderPlannerUI();
+        plannerModal.show();
+    }
+
+    function renderPlannerUI() {
+        const container = document.getElementById('planner-body-content');
+        container.innerHTML = '';
+
+        const objectiveDiv = document.createElement('div');
+        objectiveDiv.className = 'planner-objective-box';
+        objectiveDiv.innerHTML = `
+            <label class="planner-objective-label"><i class="bi bi-bullseye"></i> MỤC TIÊU / KẾT QUẢ THEN CHỐT:</label>
+            <input type="text" class="planner-objective-input" 
+                   value="${currentPlannerData.objective || ''}" 
+                   placeholder="Ví dụ: Hoàn tất đối chiếu tồn kho trước 16h..." 
+                   onchange="updatePlannerObjective(this.value)">
+        `;
+        container.appendChild(objectiveDiv);
+
+        PLANNER_DAYS.forEach(day => {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'planner-day-container';
+            
+            let tableRows = '';
+            currentPlannerData[day].forEach((item, index) => {
+                const rowClass = item.isDone ? 'planner-row-done' : '';
+                const btnClass = item.isDone ? 'btn-danger' : 'btn-outline-success';
+                const btnIcon = item.isDone ? '<i class="bi bi-x-circle"></i> Đóng' : '<i class="bi bi-check2-circle"></i> Xong';
+                
+                tableRows += `
+                    <tr class="${rowClass}">
+                        <td style="width: 30%"><input type="text" class="form-control" value="${item.content || ''}" onchange="updatePlannerItem('${day}', ${index}, 'content', this.value)" placeholder="Nội dung công việc..."></td>
+                        <td style="width: 15%"><input type="date" class="form-control" value="${item.start || ''}" onchange="updatePlannerItem('${day}', ${index}, 'start', this.value)"></td>
+                        <td style="width: 15%"><input type="date" class="form-control" value="${item.end || ''}" onchange="updatePlannerItem('${day}', ${index}, 'end', this.value)"></td>
+                        <td style="width: 25%"><input type="text" class="form-control" value="${item.result || ''}" onchange="updatePlannerItem('${day}', ${index}, 'result', this.value)" placeholder="Kết quả..."></td>
+                        <td style="width: 15%" class="text-end">
+                            <button class="btn btn-sm ${btnClass} me-1" onclick="togglePlannerItemDone('${day}', ${index})">${btnIcon}</button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="deletePlannerItem('${day}', ${index})"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            dayDiv.innerHTML = `
+                <div class="planner-day-header">
+                    <h5 class="planner-day-title">${day}</h5>
+                    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="addPlannerItem('${day}')"><i class="bi bi-plus-lg"></i> Thêm việc</button>
+                </div>
+                <div class="p-2">
+                    <table class="table table-borderless planner-table mb-0 align-middle">
+                        <thead>
+                            <tr class="text-muted border-bottom" style="font-size: 0.85rem;">
+                                <th>Công việc</th>
+                                <th>Ngày BĐ</th>
+                                <th>Ngày KT</th>
+                                <th>Kết quả</th>
+                                <th class="text-end">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                    ${currentPlannerData[day].length === 0 ? '<div class="text-center text-muted fst-italic py-3">Chưa có kế hoạch cho ngày này</div>' : ''}
+                </div>
+            `;
+            container.appendChild(dayDiv);
+        });
+    }
+
+    function updatePlannerObjective(value) { currentPlannerData.objective = value; }
+    function addPlannerItem(day) { currentPlannerData[day].push({ content: '', start: '', end: '', result: '', isDone: false }); renderPlannerUI(); }
+    function deletePlannerItem(day, index) { if(confirm('Xóa dòng kế hoạch này?')) { currentPlannerData[day].splice(index, 1); renderPlannerUI(); } }
+    function togglePlannerItemDone(day, index) { currentPlannerData[day][index].isDone = !currentPlannerData[day][index].isDone; renderPlannerUI(); }
+    function updatePlannerItem(day, index, field, value) { currentPlannerData[day][index][field] = value; }
+
+    function savePlannerData() {
+        if (!currentPlannerTaskId) return;
+        const task = currentChecklistData.tasks.find(t => t.id === currentPlannerTaskId);
+        if (task) {
+            task.weeklyPlan = currentPlannerData;
+            saveCurrentData().then(() => {
+                alert('Đã lưu kế hoạch tuần!');
+                renderTaskList(); // Render lại để cập nhật badge và smart check
+            });
+        }
+    }
+    function closePlannerModal() { if(confirm('Các thay đổi chưa lưu sẽ bị mất. Bạn có chắc muốn đóng?')) { plannerModal.hide(); } }
+
+    function isTaskOverdue(task) {
+        if (!task.weeklyPlan) return false;
+        const currentIdx = getCurrentDayIndex();
+        
+        for (const [dayName, items] of Object.entries(task.weeklyPlan)) {
+            if (dayName === 'objective') continue;
+            const dayIdx = DAY_INDEX_MAP[dayName];
+            
+            // Chỉ kiểm tra quá khứ
+            if (dayIdx < currentIdx) {
+                if (items && Array.isArray(items)) {
+                    // Logic: Chưa xong AND (Có nội dung AND Có ngày BĐ AND Có ngày KT)
+                    const hasOverdueItem = items.some(item => {
+                        const isConfigured = item.content && item.content.trim() !== '' && item.start && item.end;
+                        return isConfigured && !item.isDone;
+                    });
+                    if (hasOverdueItem) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function checkDailyProgress() {
+        if (!currentChecklistData.tasks) return;
+        const alertContainer = document.getElementById('smart-alert-container');
+        const alertList = document.getElementById('smart-alert-list');
+        let unfinishedTasks = [];
+
+        currentChecklistData.tasks.forEach(task => {
+            if (isTaskOverdue(task)) { unfinishedTasks.push(task.name); }
+        });
+
+        if (unfinishedTasks.length > 0) {
+            alertList.innerHTML = '';
+            unfinishedTasks.forEach(name => {
+                const li = document.createElement('li'); li.innerText = name; alertList.appendChild(li);
+            });
+            alertContainer.style.display = 'block'; 
+        } else {
+            alertContainer.style.display = 'none'; 
+        }
+    }
+
+    // --- 10. CRUD & LOGIC CHÍNH ---
     function openNewAccountantModal(type) {
         checklistType = type;
         const title = (type === 'coordinator') ? 'Kho & Giao nhận' : 'Phụ trách SOP';
@@ -485,21 +726,42 @@
         const categories = new Set(source.map(t => t.category));
         if (currentChecklistData && currentChecklistData.tasks) currentChecklistData.tasks.forEach(t => { if(t.category) categories.add(t.category); });
         categories.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.innerText = c; select.appendChild(opt); });
-        document.getElementById('acc-checklist-taskName').value = ''; document.getElementById('acc-checklist-taskDeadline').value = '';
+        document.getElementById('acc-checklist-taskName').value = ''; 
     }
 
     async function addTask() {
         const name = document.getElementById('acc-checklist-taskName').value.trim();
         const cat = document.getElementById('acc-checklist-taskCategory').value;
-        const dead = document.getElementById('acc-checklist-taskDeadline').value;
         if (!name || !cat) return alert('Vui lòng nhập tên và chọn phân loại!');
         if (!currentChecklistData.tasks) currentChecklistData.tasks = [];
         const maxId = currentChecklistData.tasks.reduce((max, t) => Math.max(max, t.id), 0);
-        currentChecklistData.tasks.push({ id: maxId + 1, category: cat, name: name, deadline: dead, status: 'not-started', notes: '' });
+        currentChecklistData.tasks.push({ id: maxId + 1, category: cat, name: name, status: 'not-started', notes: '' });
         await saveCurrentData(); addTaskModal.hide(); renderTaskList();
     }
 
-    async function updateTaskStatus(taskId, status) { const task = currentChecklistData.tasks.find(t => t.id === taskId); if (task) { task.status = status; await saveCurrentData(); renderTaskList(); } }
+    async function updateTaskStatus(taskId, status) {
+        const task = currentChecklistData.tasks.find(t => t.id === taskId); 
+        if (task) { 
+            task.status = status; 
+            await saveCurrentData(); 
+            renderTaskList(); 
+        } 
+    }
+
+    // CHECK VÀ GỌI MODAL GHI CHÚ
+    function checkAndCompleteTask(taskId) {
+        const task = currentChecklistData.tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        // KIỂM TRA KHÓA TRẠNG THÁI
+        if (isTaskOverdue(task)) {
+            alert('CẢNH BÁO QUẢN TRỊ:\n\nCông việc này đang có hạng mục trong Kế hoạch chi tiết bị TRỄ HẠN.\n\nVui lòng vào "Lập KH" để xử lý dứt điểm trước khi báo cáo hoàn thành.');
+            return;
+        }
+
+        showCompletionNotesModal(taskId);
+    }
+
     function showCompletionNotesModal(taskId) { currentTaskForCompletion = taskId; document.getElementById('acc-checklist-completionNotes').value = ''; document.getElementById('acc-checklist-notesValidation').innerText = ''; completionNotesModal.show(); }
     function validateCompletionNotes() { const len = document.getElementById('acc-checklist-completionNotes').value.length; const msg = document.getElementById('acc-checklist-notesValidation'); if (len < 20) { msg.innerText = `Cần thêm ${20 - len} ký tự.`; document.getElementById('acc-checklist-saveCompletionBtn').disabled = true; } else { msg.innerText = ''; document.getElementById('acc-checklist-saveCompletionBtn').disabled = false; } }
     async function saveCompletionWithNotes() { const notes = document.getElementById('acc-checklist-completionNotes').value; if (notes.length < 20) return; const task = currentChecklistData.tasks.find(t => t.id === currentTaskForCompletion); if (task) { task.status = 'completed'; task.notes = notes; await saveCurrentData(); completionNotesModal.hide(); renderTaskList(); } }
@@ -518,9 +780,11 @@
         document.getElementById('acc-checklist-notStartedTasks').innerText = pending;
         const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
         const bar = document.getElementById('acc-checklist-totalProgressBar'); bar.style.width = `${pct}%`; bar.innerText = `${pct}%`;
+        
+        checkDailyProgress(); // GỌI SMART CHECK
     }
 
-    // --- 10. TẠO NỘI DUNG PDF BÁO CÁO (ĐƯỢC LÀM MỚI HOÀN TOÀN) ---
+    // --- 11. XUẤT PDF (CẬP NHẬT: HIỆN MỤC TIÊU) ---
     function generatePDFReportContent() {
         if (!currentChecklistData || !currentChecklistData.tasks) return;
         
@@ -533,7 +797,6 @@
         const notStarted = total - completed - inProgress;
         const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
         
-        // Xác định tiêu đề dựa trên loại checklist
         let reportTitle = checklistType === 'coordinator' ? "BÁO CÁO KHO & GIAO NHẬN" : "BÁO CÁO GIÁM SÁT SOP";
 
         let html = `
@@ -570,7 +833,6 @@
             <h5 class="text-center text-uppercase fw-bold mt-4 mb-3" style="color: #004a99;">CHI TIẾT CÔNG VIỆC</h5>
         `;
 
-        // Gom nhóm theo category để hiển thị trong PDF
         const categories = [...new Set(currentChecklistData.tasks.map(t => t.category || "Khác"))];
         
         categories.forEach(category => {
@@ -581,9 +843,10 @@
                 <table class="table table-bordered table-sm mt-2" style="font-size: 13px;">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 50%">Tên công việc</th>
+                            <th style="width: 40%">Tên công việc</th>
+                            <th style="width: 20%">Mục tiêu</th>
                             <th style="width: 15%">Trạng thái</th>
-                            <th style="width: 35%">Ghi chú / Kết quả</th>
+                            <th style="width: 25%">Ghi chú / Kết quả</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -595,9 +858,15 @@
                 else if (task.status === 'in-progress') { statusText = 'Đang làm'; statusClass = 'text-warning fw-bold'; }
                 else { statusText = 'Chưa làm'; statusClass = 'text-secondary'; }
                 
+                let objective = '';
+                if (task.weeklyPlan && task.weeklyPlan.objective) {
+                    objective = `<span class="text-primary fst-italic">${task.weeklyPlan.objective}</span>`;
+                }
+
                 html += `
                     <tr>
                         <td>${task.name}</td>
+                        <td>${objective}</td>
                         <td class="${statusClass}">${statusText}</td>
                         <td>${task.notes || ''}</td>
                     </tr>
@@ -610,18 +879,16 @@
         document.getElementById('acc-checklist-reportContent').innerHTML = html;
     }
 
-    // --- 11. HÀM XUẤT PDF ---
+    // --- 12. XUẤT PDF ---
     window.exportToPDF = function() {
         const element = document.getElementById('acc-checklist-reportContent');
         if (!currentChecklistData) return;
         
-        // Cấu hình tên file
         let prefix = checklistType === 'coordinator' ? "KhoVan" : "SOP";
         let fileName = `BaoCao_${prefix}_${slugify(currentChecklistData.coordinatorName)}_${new Date().toLocaleDateString('vi-VN').replace(/\//g,'-')}.pdf`;
 
         const opt = {
-            margin:       10, // lề mm
-            filename:     fileName,
+            margin:       10, filename:     fileName,
             image:        { type: 'jpeg', quality: 0.98 },
             html2canvas:  { scale: 2, useCORS: true }, 
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
@@ -633,19 +900,15 @@
         btn.disabled = true;
 
         html2pdf().set(opt).from(element).save().then(() => {
-            btn.innerHTML = oldText;
-            btn.disabled = false;
+            btn.innerHTML = oldText; btn.disabled = false;
         }).catch(err => {
-            console.error(err);
-            alert("Lỗi khi xuất PDF");
-            btn.innerHTML = oldText;
-            btn.disabled = false;
+            console.error(err); alert("Lỗi khi xuất PDF"); btn.innerHTML = oldText; btn.disabled = false;
         });
     };
 
     async function confirmRefreshChecklist() {
         if(confirm('Làm mới toàn bộ trạng thái về "Chưa làm"?')) {
-            currentChecklistData.tasks.forEach(t => { t.status = 'not-started'; t.notes = ''; });
+            currentChecklistData.tasks.forEach(t => { t.status = 'not-started'; t.notes = ''; t.weeklyPlan = null; });
             await saveCurrentData();
             renderTaskList();
         }
